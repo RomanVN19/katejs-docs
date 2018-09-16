@@ -1,0 +1,54 @@
+{
+  "name": "katejs",
+  "version": "0.1.5",
+  "description": "KateJS - фреймворк разработки бизнес приложений.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel src --out-dir dist --copy-files",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romannep/katejs.git"
+  },
+  "author": "Roman Nep <neproman@gmail.com>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/romannep/katejs/issues"
+  },
+  "dependencies": {
+    "@babel/runtime": "7.0.0-beta.55",
+    "babel-loader": "^7.1.5",
+    "css-loader": "^1.0.0",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "history": "^4.7.2",
+    "kate-client": "^0.1.5",
+    "koa": "^2.5.2",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "koa-send": "^5.0.0",
+    "koa-static": "^5.0.0",
+    "mysql2": "^1.5.3",
+    "sequelize": "^4.38.0",
+    "webpack": "^4.16.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^7.2.3",
+    "babel-plugin-module-resolver": "^3.1.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-import-resolver-babel-module": "^4.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-jsx-a11y": "^6.1.0",
+    "eslint-plugin-react": "^7.7.0",
+    "nodemon": "^1.18.3",
+    "style-loader": "^0.21.0"
+  },
+  "homepage": "https://github.com/romannep/katejs#readme"
+}
