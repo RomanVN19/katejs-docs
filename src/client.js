@@ -259,7 +259,7 @@ const use = (parent, ...classes) => {
   return result;
 };
 
-const KatePlatformClient = ({ AppClient }) => {
+const KateJSClient = ({ AppClient }) => {
   KateClient({ app: AppClient(App) });
 };
 
@@ -274,4 +274,4 @@ export {
 };
 
 
-export default KatePlatformClient;
+export default KateJSClient;

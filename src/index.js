@@ -34,7 +34,7 @@ const trivialLogger = {
   error: (...args) => console.error(...args),
 };
 
-export default class KatePlatform {
+export default class KateJS {
   constructor({ AppServer, logger }) {
     this.logger = logger || trivialLogger;
     this.server = new KateServer({ App: AppServer, logger: this.logger });
