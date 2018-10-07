@@ -7,10 +7,27 @@
 - MySQL
 
 ## Разработка
-Разработка начинается с шаблона приложения.
+Разработка начинается с шаблона приложения, доступного в репозитории [katejs-boilerplate](https://github.com/romannep/katejs-boilerplate).
+
+Для разворачивания шаблона в текущую папку:
 ````
-TODO
+git clone https://github.com/romannep/katejs-boilerplate.git .
+npm install
 ````
+Поправьте в файле package.json как минимум поля `name`, `author`.
+
+Для работы с git с удаленным репозиторием вашего приложения
+````
+git remote remove origin
+git remote add origin <your repository url>
+````
+
+Для первого запуска раскомментируйте в `index.js` строчку 
+````
+// platform.syncDatabase();
+````
+и отредактируйте параметры соединения с СУБД в `AppServer.js`.
+
 
 Запуск приложения в режиме разработки:
 ````

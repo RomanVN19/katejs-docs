@@ -8,7 +8,7 @@
 
 Файл `structure.js`:
 ````
-import Fields from 'katejs/fields';
+import Fields from 'katejs/lib/fields';
 
 const Task = { // Имя сущности
   name: 'task', // служебное имя сущности для работы с БД
