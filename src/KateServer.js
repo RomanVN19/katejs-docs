@@ -28,6 +28,12 @@ const trivialLogger = {
 };
 
 class AppServer {
+  constructor() {
+    this.entities = {};
+    this.httpParams = {
+      port: 2000,
+    };
+  }
 }
 
 export default class KateServer {
