@@ -41,8 +41,9 @@ export default class KateServer {
     Object.keys(entitiesClasses).forEach((name) => {
       entities[name] = new entitiesClasses[name]({ logger: this.logger });
     });
-
-    this.database = new Database({ databaseParams, entities, logger: this.logger });
+    if (databaseParams) {
+      this.database = new Database({ databaseParams, entities, logger: this.logger });
+    }
     this.http = new Http({ httpParams, entities, logger: this.logger });
   }
   run() {
@@ -51,8 +52,12 @@ export default class KateServer {
     this.logger.info('... http server started at port', this.http.httpParams.port);
   }
   async syncDatabase() {
-    this.logger.info('synchronizing database structure...');
-    await this.database.sync();
-    this.logger.info('...database structure synchronized');
+    if (this.database) {
+      this.logger.info('synchronizing database structure...');
+      await this.database.sync();
+      this.logger.info('...database structure synchronized');
+    } else {
+      this.logger.info('No database params!');
+    }
   }
 }

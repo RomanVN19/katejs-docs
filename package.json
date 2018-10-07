@@ -1,6 +1,6 @@
 {
   "name": "katejs",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "KateJS - фреймворк разработки бизнес приложений.",
   "main": "lib/index.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "css-loader": "^1.0.0",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "history": "^4.7.2",
-    "kate-client": "^0.1.5",
+    "kate-client": "^0.1.8",
     "koa": "^2.5.2",
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",

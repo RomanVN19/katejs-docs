@@ -25,7 +25,6 @@ import { makeItemForm, makeListForm } from './client';
 const makeFormsFromStructure = ({ structures, menu }) => {
   const allForms = {};
   Object.keys(structures).forEach((key) => {
-    console.log('making forms for', key, structures[key]);
     allForms[`${key}Item`] = makeItemForm({ structure: structures[key], name: key });
     allForms[`${key}List`] = makeListForm({ structure: structures[key], name: key });
     if (menu) {
@@ -45,31 +44,36 @@ export default class PlatformApp extends App {
   static path = '/';
   static title = 'KateJS';
 
-  constructor(params){
-    super(params);
-    console.log('platform app constructor');
-  }
+  // constructor(params){
+  //   super(params);
+  //   console.log('platform app constructor');
+  // }
   init({ structures }) {
     this.menu = [];
     this.allForms = makeFormsFromStructure({ structures, menu: this.menu });
     this.forms = [];
     this.baseUrl = '/api';
-    Object.values(this.allForms).forEach(form => this.addForm(form));
+    this.addForms(this.allForms);
     this.makeApiLinks({ entities: Object.keys(structures) });
   }
-  addForm(form) {
-    let found;
-    this.forms.forEach((item) => {
-      if (form.path.indexOf(item.path) > -1) {
-        found = true;
+  addForms(forms) {
+
+    Object.keys(forms).forEach((formName) => {
+      let found;
+      const form = forms[formName];
+      this.allForms[formName] = form;
+      this.forms.forEach((item) => {
+        if (form.path.indexOf(item.path) > -1) {
+          found = true;
+        }
+      });
+
+      if (found) {
+        this.forms.unshift(form);
+      } else {
+        this.forms.push(form);
       }
     });
-
-    if (found) {
-      this.forms.unshift(form);
-    } else {
-      this.forms.push(form);
-    }
   }
   makeApiLinks({ entities }) {
     const app = this;
