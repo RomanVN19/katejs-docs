@@ -28,8 +28,7 @@ export const makeEntityFromStructure = structure =>
     }
   };
 
-export const makeEntitiesFromStructures = (structures) => {
-  const entities = {};
+export const makeEntitiesFromStructures = (entities, structures) => {
   Object.keys(structures).forEach((name) => {
     entities[name] = makeEntityFromStructure(structures[name]);
   });

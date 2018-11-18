@@ -25,13 +25,13 @@ import KateServer from './KateServer';
 
 import Fields from './fields';
 import { makeEntitiesFromStructures } from './server';
-import { Entity } from './Entity';
+import Entity from './Entity';
 
 
 const trivialLogger = {
-  info: (...args) => console.log(...args),
-  debug: (...args) => console.log(...args),
-  error: (...args) => console.error(...args),
+  info: (...args) => console.log(...args), // eslint-disable-line no-console
+  debug: (...args) => console.log(...args), // eslint-disable-line no-console
+  error: (...args) => console.error(...args), // eslint-disable-line no-console
 };
 
 export default class KateJS {
@@ -48,7 +48,7 @@ export default class KateJS {
   compileClient() {
     this.logger.info('Compiling client...');
     webpack({
-      entry: './src/client.js',
+      entry: './src/index.js',
       output: {
         path: `${process.cwd()}/build`,
         filename: './bundle/bundle.js',
@@ -70,7 +70,7 @@ export default class KateJS {
           }),
         }],
       },
-      mode: 'development',
+      devtool: 'source-map',
     }, (err, stats) => {
       if (err || stats.hasErrors()) {
         const info = stats.toJson();
@@ -89,6 +89,7 @@ export default class KateJS {
 
 const use = (parent, ...classes) => {
   let result = parent;
+  result.packages = result.packages || [];
   (classes || []).forEach((Package) => {
     if (result.packages.indexOf(Package.package) === -1) {
       result.packages.push(Package.package);

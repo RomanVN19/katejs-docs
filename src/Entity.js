@@ -23,21 +23,36 @@ export const modelGetOptions = Symbol('modelGetOptions');
 
 export const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
 
-const noItemErr = { message : 'Can\'t find entity item', status: 404 };
+const noItemErr = { message: 'Can\'t find entity item', status: 404 };
 
+const replaceOps = (obj, S) => {
+  const result = {};
+  Object.keys(obj).forEach((key) => {
+    let newKey = key;
+    if (key[0] === '$') {
+      newKey = S.Op[key.substr(1)];
+    }
+    if (typeof obj[key] === 'object') {
+      result[newKey] = replaceOps(obj[key], S);
+    } else {
+      result[newKey] = obj[key];
+    }
+  });
+  return result;
+};
 
 export default class Entity {
-  constructor({ logger }) {
-    this.logger = logger;
+  constructor(params) {
+    Object.assign(this, params);
   }
-  async get({ data, ctx }) {
+  async get({ data }) {
     const item = await this[model].findById(data.uuid, this[modelGetOptions]);
     if (!item) {
       return { error: noItemErr };
     }
     return { response: item };
   }
-  async put({ data, ctx }) {
+  async put({ data }) {
     let item;
     if (data.uuid) {
       item = await this[model].findById(data.uuid);
@@ -59,9 +74,9 @@ export default class Entity {
         item[`set${capitalize(table.name)}`](rows);
       });
     }
-    return { response: item.get() };
+    return { response: item };
   }
-  async delete({ data, ctx }) {
+  async delete({ data }) {
     const item = await this[model].findById(data.uuid, this[modelGetOptions]);
     if (!item) {
       return { error: noItemErr };
@@ -69,7 +84,11 @@ export default class Entity {
     await item.destroy();
     return { response: { ok: true } };
   }
-  async query({ data, ctx }) {
-    return { response: await this[model].findAll({ ...this[modelGetOptions] }) };
+  async query(params) {
+    const { data } = params || {};
+    if (data && data.where) {
+      data.where = replaceOps(data.where, this[model].Sequelize);
+    }
+    return { response: await this[model].findAll({ ...this[modelGetOptions], ...data }) };
   }
 }

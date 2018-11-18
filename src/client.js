@@ -21,6 +21,8 @@ along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 import KateClient, { Elements, Form } from 'kate-client';
 import App from './App';
 import Fields from './fields';
+import { ConfirmDialog } from './forms/Dialogs';
+import translations from './translations';
 
 const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
 
@@ -30,9 +32,11 @@ const elementsByFields = {
   [Fields.STRING]: Elements.INPUT,
   [Fields.REFERENCE]: Elements.SELECT,
   [Fields.DECIMAL]: Elements.INPUT,
+  [Fields.BOOLEAN]: Elements.CHECKBOX,
+  [Fields.TEXT]: Elements.INPUT,
 };
 
-const getElementByField = (field, form) => {
+export const getElement = (field, form) => {
   const element = {
     id: field.name,
     title: capitalize(field.name),
@@ -57,21 +61,25 @@ const getElementByField = (field, form) => {
       return res ? res[0] : 0;
     };
   }
+  if (field.type === Fields.TEXT) {
+    element.rows = 5;
+  }
   return element;
 };
 
-const getTableElement = (table, form) => {
+export const getTableElement = (table, form) => {
   const tableElement = {
     type: Elements.TABLE_EDITABLE,
     id: table.name,
     columns: [],
   };
-  table.fields.forEach((field) => {
-    const element = getElementByField(field, form);
-    element.dataPath = element.id;
-    delete element.id;
-    tableElement.columns.push(element);
-  });
+  table.fields.filter(field => !field.skipForForm)
+    .forEach((field) => {
+      const element = getElement(field, form);
+      element.dataPath = element.id;
+      delete element.id;
+      tableElement.columns.push(element);
+    });
   const addButton = {
     type: Elements.BUTTON,
     title: 'Add',
@@ -79,6 +87,7 @@ const getTableElement = (table, form) => {
   };
 
   const cardElement = {
+    id: `${table.name}Card`,
     type: Elements.CARD,
     title: capitalize(table.name),
     elements: [
@@ -99,50 +108,52 @@ const makeItemForm = ({ structure: entity, name }) =>
   class ItemForm extends Form {
     static title = capitalize(entity.name)
     static path = `/${entity.name}/:id`;
-    constructor(sys, params) {
-      super(sys);
-      const elements = (entity.fields || []).map(field => getElementByField(field, this));
+    constructor(args) {
+      super(args);
+      const { params } = args;
+      const elements = (entity.fields || [])
+        .filter(field => !field.skipForForm)
+        .map(field => getElement(field, this));
       (entity.tables || []).forEach(table => elements.push(getTableElement(table, this)));
-      this.init({
-        actions: [
-          {
-            id: '__OK',
-            type: Elements.BUTTON,
-            title: 'OK',
-            onClick: this.ok,
-          },
-          {
-            id: '__Save',
-            type: Elements.BUTTON,
-            title: 'Save',
-            onClick: this.save,
-          },
-          {
-            id: '__Load',
-            type: Elements.BUTTON,
-            title: 'Load',
-            onClick: this.load,
-          },
-          {
-            id: '__Delete',
-            type: Elements.BUTTON,
-            title: 'Delete',
-            onClick: this.delete,
-          },
-          {
-            id: '__Close',
-            type: Elements.BUTTON,
-            title: 'Close',
-            onClick: this.close,
-          },
-        ],
-        elements,
-      });
+      this.actions = [
+        {
+          id: '__OK',
+          type: Elements.BUTTON,
+          title: 'OK',
+          onClick: this.ok,
+        },
+        {
+          id: '__Save',
+          type: Elements.BUTTON,
+          title: 'Save',
+          onClick: this.save,
+        },
+        {
+          id: '__Load',
+          type: Elements.BUTTON,
+          title: 'Load',
+          onClick: this.load,
+        },
+        {
+          id: '__Delete',
+          type: Elements.BUTTON,
+          title: 'Delete',
+          onClick: this.delete,
+        },
+        {
+          id: '__Close',
+          type: Elements.BUTTON,
+          title: 'Close',
+          onClick: this.close,
+        },
+      ];
+      this.elements = elements;
 
       if (params.id && params.id !== 'new') {
         this.uuid = params.id;
         this.load();
       }
+      this.elements.push(ConfirmDialog({ form: this, id: 'confirmDialog' }));
     }
     load = async () => {
       const result = await this.app[name].get({ uuid: this.uuid });
@@ -159,15 +170,22 @@ const makeItemForm = ({ structure: entity, name }) =>
         this.uuid = result.response.uuid;
         this.app.showAlert({ type: 'success', title: 'Saved!' });
       }
+      if (result.error) {
+        this.app.showAlert({ type: 'warning', title: result.error.message });
+      }
     }
     close = () => {
-      this.app.open(this.app.allForms[`${name}List`]);
+      this.app.open(this.app.forms[`${name}List`]);
     }
     delete = async () => {
-      const result = this.app[name].delete({ uuid: this.uuid });
+      if (!await this.content.confirmDialog.confirm({ title: 'Are you shure?' })) return;
+      const result = await this.app[name].delete({ uuid: this.uuid });
       if (result.response) {
         this.close();
         this.app.showAlert({ type: 'success', title: 'Deleted!' });
+      }
+      if (result.error) {
+        this.app.showAlert({ type: 'warning', title: result.error.message });
       }
     }
     ok = async () => {
@@ -180,76 +198,51 @@ const makeListForm = ({ structure: entity, name }) =>
   class ListForm extends Form {
     static title = makeTitle(entity.name)
     static path = `/${entity.name}`;
-    constructor(sys) {
-      super(sys);
+    constructor(args) {
+      super(args);
 
       this.entity = entity.name;
 
-      this.init({
-        actions: [
-          {
-            id: 'new',
-            type: Elements.BUTTON,
-            title: 'New',
-            onClick: this.newItem,
-          },
-        ],
-        elements: [
-          {
-            id: 'list',
-            type: Elements.TABLE,
-            rowClick: this.editRow,
-            columns: [
-              { title: 'Name', dataPath: 'title' },
-            ],
-            value: [],
-          },
-        ],
-      });
-      this.load();
+      this.actions = [
+        {
+          id: '__Add',
+          type: Elements.BUTTON,
+          title: 'Add',
+          onClick: this.newItem,
+        },
+      ];
+
+      this.elements = [
+        {
+          id: 'list',
+          type: Elements.TABLE,
+          rowClick: this.editRow,
+          columns: [
+            { title: 'Title', dataPath: 'title' },
+          ],
+          value: [],
+        },
+      ];
+      setTimeout(this.load, 0);
     }
     load = async () => {
-      const result = await this.app[name].query();
+      const result = await this.app[name].query({ where: this.filters });
       this.content.list.value = result.response;
+      if (result.error) {
+        this.app.showAlert({ type: 'warning', title: result.error.message });
+      }
     }
     newItem = () => {
-      this.app.open(this.app.allForms[`${name}Item`], { id: 'new' });
+      this.app.open(this.app.forms[`${name}Item`], { id: 'new' });
     }
     editRow = (row) => {
-      this.app.open(this.app.allForms[`${name}Item`], { id: row.uuid });
+      this.app.open(this.app.forms[`${name}Item`], { id: row.uuid });
     }
   };
-
-const makeClientApp = (app) => {
-  return class ClientApp extends App {
-    static path = '/';
-    static title = app.title;
-    constructor(sys) {
-      super(sys);
-
-      this.forms = [];
-      const entities = Object.keys(app.entities).map(entityName => app.entities[entityName]);
-      entities.forEach((entity) => {
-        entity.forms = entity.forms || [];
-        entity.formItem = makeItemForm(entity);
-        entity.formList = makeListForm(entity);
-        entity.forms.push(entity.formList);
-        entity.forms.push(entity.formItem);
-        this.forms.push(entity.formItem); // !item first
-        this.forms.push(entity.formList);
-      });
-      this.menu = entities.map(entity => ({
-        title: entity.formList.title,
-        form: entity.formList,
-      }));
-
-      this.baseUrl = '/api';
-    }
-  };
-};
 
 const use = (parent, ...classes) => {
   let result = parent;
+  result.packages = result.packages || [];
   (classes || []).forEach((Package) => {
     if (result.packages.indexOf(Package.package) === -1) {
       result.packages.push(Package.package);
@@ -259,8 +252,8 @@ const use = (parent, ...classes) => {
   return result;
 };
 
-const KateJSClient = ({ AppClient }) => {
-  KateClient({ app: AppClient(App) });
+const KateJSClient = ({ AppClient, translations: userTranslations }) => {
+  KateClient({ app: AppClient(App), translations: userTranslations });
 };
 
 
@@ -271,6 +264,8 @@ export {
   makeItemForm,
   makeListForm,
   use,
+  ConfirmDialog,
+  translations,
 };
 
 

@@ -23,6 +23,8 @@ const Fields = {
   INTEGER: Symbol('integer'),
   REFERENCE: Symbol('reference'),
   DECIMAL: Symbol('decimal'),
+  BOOLEAN: Symbol('boolean'),
+  TEXT: Symbol('TEXT'),
 };
 
 export default Fields;

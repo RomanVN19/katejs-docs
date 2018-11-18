@@ -22,20 +22,21 @@ import { App } from 'kate-client';
 
 import { makeItemForm, makeListForm } from './client';
 
-const makeFormsFromStructure = ({ structures, menu }) => {
-  const allForms = {};
+const makeFormsFromStructure = ({ structures, menu, forms: allForms, addToMenu }) => {
   Object.keys(structures).forEach((key) => {
+    // eslint-disable-next-line no-param-reassign
     allForms[`${key}Item`] = makeItemForm({ structure: structures[key], name: key });
+    // eslint-disable-next-line no-param-reassign
     allForms[`${key}List`] = makeListForm({ structure: structures[key], name: key });
-    if (menu) {
-      menu.push({
+    if (menu && addToMenu) {
+      menu.unshift({ // add last app forms to top
         title: allForms[`${key}List`].title,
-        form: allForms[`${key}List`],
+        form: `${key}List`,
       });
     }
-  })
+  });
   return allForms;
-}
+};
 
 
 export default class PlatformApp extends App {
@@ -48,32 +49,17 @@ export default class PlatformApp extends App {
   //   super(params);
   //   console.log('platform app constructor');
   // }
-  init({ structures }) {
-    this.menu = [];
-    this.allForms = makeFormsFromStructure({ structures, menu: this.menu });
-    this.forms = [];
-    this.baseUrl = '/api';
-    this.addForms(this.allForms);
-    this.makeApiLinks({ entities: Object.keys(structures) });
-  }
-  addForms(forms) {
-
-    Object.keys(forms).forEach((formName) => {
-      let found;
-      const form = forms[formName];
-      this.allForms[formName] = form;
-      this.forms.forEach((item) => {
-        if (form.path.indexOf(item.path) > -1) {
-          found = true;
-        }
-      });
-
-      if (found) {
-        this.forms.unshift(form);
-      } else {
-        this.forms.push(form);
-      }
+  init({ structures, addToMenu }) {
+    this.menu = this.menu || [];
+    this.forms = this.forms || {};
+    makeFormsFromStructure({
+      structures,
+      menu: this.menu,
+      forms: this.forms,
+      addToMenu,
     });
+    this.baseUrl = '/api';
+    this.makeApiLinks({ entities: Object.keys(structures) });
   }
   makeApiLinks({ entities }) {
     const app = this;
@@ -86,7 +72,7 @@ export default class PlatformApp extends App {
               entity,
               method: prop,
               data,
-            })
+            }),
           });
         },
         set() {

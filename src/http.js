@@ -38,11 +38,24 @@ const noMethodResponse = (ctx) => {
 
 
 export default class Http {
-  constructor({ httpParams, logger, entities }) {
+  constructor({ httpParams, logger, entities, middlewares }) {
     this.app = new Koa();
     this.logger = logger;
     this.httpParams = httpParams;
     this.entities = entities;
+    if (httpParams.cors !== false) {
+      this.app.use(async (ctx, next) => {
+        ctx.vary('Origin');
+        ctx.set('Access-Control-Allow-Origin', '*');
+        if (ctx.method !== 'OPTIONS') {
+          await next();
+        } else {
+          ctx.set('Access-Control-Allow-Methods', '*');
+          ctx.set('Access-Control-Allow-Headers', '*');
+          ctx.status = 204;
+        }
+      });
+    }
     this.app.use(async (ctx, next) => {
       const start = Date.now();
       await next();
@@ -50,7 +63,7 @@ export default class Http {
       logger.info(`${ctx.method} ${ctx.url} ${ctx.status} - ${ms}`);
     });
     this.app.use(BodyParser());
-
+    middlewares.forEach(middleware => this.app.use(middleware));
     this.router = new Router();
     // this.router.get('/', async (ctx) => {
     //   ctx.body = '<body>Hello, world!</body>';

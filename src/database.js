@@ -27,6 +27,8 @@ export const SequelizeFields = {
   [Fields.INTEGER]: Sequelize.INTEGER,
   [Fields.REFERENCE]: Sequelize.VIRTUAL,
   [Fields.DECIMAL]: Sequelize.DECIMAL,
+  [Fields.BOOLEAN]: Sequelize.BOOLEAN,
+  [Fields.TEXT]: Sequelize.TEXT,
 };
 
 const getModelParams = (entity) => {
@@ -60,6 +62,13 @@ const getModelParams = (entity) => {
         entity[modelGetOptions].attributes.push(field.name);
         modelParams[field.name] = {
           type: SequelizeFields[field.type](field.length || 15, field.precision || 2),
+        };
+        break;
+      case Fields.BOOLEAN:
+        entity[modelGetOptions].attributes.push(field.name);
+        modelParams[field.name] = {
+          type: SequelizeFields[field.type],
+          defaultValue: false,
         };
         break;
       default:
@@ -129,6 +138,8 @@ export default class Database {
         const { params, options } = getModelParams(entity);
         // eslint-disable-next-line no-param-reassign
         entity[model] = this.sequelize.define(entity.name, params, options);
+        // eslint-disable-next-line no-param-reassign
+        entity[model].Sequelize = Sequelize;
       }
       if (entity.tables) {
         entity.tables.forEach((table) => {

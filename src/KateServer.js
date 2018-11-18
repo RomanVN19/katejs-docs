@@ -28,12 +28,14 @@ const trivialLogger = {
 };
 
 class AppServer {
-  constructor() {
+  constructor({ logger }) {
+    this.logger = logger;
     this.entities = {};
     this.httpParams = {
       port: 2000,
       host: '0.0.0.0',
     };
+    this.httpMidlewares = [];
   }
 }
 
@@ -42,16 +44,28 @@ export default class KateServer {
     this.logger = logger || trivialLogger;
 
     this.logger.info('Creating KateServer...');
-    this.app = new (App(AppServer))();
+    this.app = new (App(AppServer))({ logger: this.logger });
     const { databaseParams, httpParams, entities: entitiesClasses } = this.app;
     const entities = {};
+    if (this.app.beforeInit) this.app.beforeInit();
     Object.keys(entitiesClasses).forEach((name) => {
-      entities[name] = new entitiesClasses[name]({ logger: this.logger });
+      entities[name] = new entitiesClasses[name]({ logger: this.logger, app: this.app });
+      this.app[name] = entities[name];
     });
     if (databaseParams) {
       this.database = new Database({ databaseParams, entities, logger: this.logger });
     }
-    this.http = new Http({ httpParams, entities, logger: this.logger });
+    this.http = new Http({
+      httpParams,
+      entities,
+      logger: this.logger,
+      middlewares: this.app.httpMidlewares,
+    });
+
+    Object.keys(entities).forEach((name) => {
+      if (entities[name].afterInit) entities[name].afterInit();
+    })
+    if (this.app.afterInit) this.app.afterInit();
   }
   run() {
     this.logger.info('starting http server...');
