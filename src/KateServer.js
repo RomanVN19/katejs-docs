@@ -32,6 +32,7 @@ class AppServer {
     this.entities = {};
     this.httpParams = {
       port: 2000,
+      host: '0.0.0.0',
     };
   }
 }

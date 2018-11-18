@@ -70,7 +70,7 @@ export default class Http {
     });
   }
   listen() {
-    this.app.listen(this.httpParams.port);
+    this.app.listen(this.httpParams.port, this.httpParams.host || '0.0.0.0');
   }
   api = async (ctx) => {
     this.logger.debug('api request', ctx.params, ctx.request.body);
