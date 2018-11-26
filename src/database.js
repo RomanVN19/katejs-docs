@@ -129,7 +129,6 @@ export default class Database {
       this.logger.info('...connected to database');
     } catch (e) {
       this.logger.error('...can not connect to database!');
-      throw new Error('No database connection');
     }
   }
   createModels() {
