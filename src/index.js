@@ -68,6 +68,10 @@ export default class KateJS {
             fallback: 'style-loader',
             use: 'css-loader',
           }),
+        },
+        {
+          test: /\.svg$/,
+          use: ['@svgr/webpack', 'url-loader'],
         }],
       },
       devtool: 'source-map',
