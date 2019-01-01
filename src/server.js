@@ -19,9 +19,11 @@ along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import Entity from './Entity';
+import KateServer from './KateServer';
 
 export const makeEntityFromStructure = structure =>
   class EntityFromStructure extends Entity {
+    static structure = structure;
     constructor(params) {
       super(params);
       Object.assign(this, structure);
@@ -30,7 +32,27 @@ export const makeEntityFromStructure = structure =>
 
 export const makeEntitiesFromStructures = (entities, structures) => {
   Object.keys(structures).forEach((name) => {
+    // eslint-disable-next-line no-param-reassign
     entities[name] = makeEntityFromStructure(structures[name]);
   });
   return entities;
 };
+
+export const trivialLogger = {
+  info: (...args) => console.log(...args), // eslint-disable-line no-console
+  debug: (...args) => console.log(...args), // eslint-disable-line no-console
+  error: (...args) => console.error(...args), // eslint-disable-line no-console
+};
+
+export default class KateJSServer {
+  constructor({ AppServer, logger }) {
+    this.logger = logger || trivialLogger;
+    this.server = new KateServer({ App: AppServer, logger: this.logger });
+  }
+  syncDatabase() {
+    this.server.syncDatabase();
+  }
+  start() {
+    this.server.run();
+  }
+}

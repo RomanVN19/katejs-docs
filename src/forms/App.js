@@ -19,8 +19,11 @@ along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { App } from 'kate-client';
+import { Layout, components } from 'kate-form-material-kit-react';
 
-import { makeItemForm, makeListForm } from './client';
+import { makeItemForm, makeListForm } from '../client';
+import Menu, { setMenu } from './Menu';
+import Alerts, { showAlert } from './Alerts';
 
 const makeFormsFromStructure = ({ structures, menu, forms: allForms, addToMenu }) => {
   Object.keys(structures).forEach((key) => {
@@ -44,14 +47,40 @@ export default class PlatformApp extends App {
   static packages = ['katejs'];
   static path = '/';
   static title = 'KateJS';
-
-  // constructor(params){
-  //   super(params);
-  //   console.log('platform app constructor');
-  // }
+  static components = components;
+  constructor(params) {
+    super(params);
+    this.layouts = {
+      main: {
+        component: Layout,
+        areas: {
+          main: { default: true },
+          leftMenu: {},
+          alerts: {},
+        },
+      },
+    };
+    this.defaultLayout = {
+      layout: 'main',
+      areas: {
+        leftMenu: 'M',
+        alerts: 'A',
+      },
+    };
+  }
+  setMenu(menu) {
+    if (this[setMenu]) {
+      this[setMenu](menu);
+    }
+  }
+  showAlert(params) {
+    if (this[showAlert]) {
+      this[showAlert](params);
+    }
+  }
   init({ structures, addToMenu }) {
     this.menu = this.menu || [];
-    this.forms = this.forms || {};
+    this.forms = this.forms || { M: Menu, A: Alerts };
     makeFormsFromStructure({
       structures,
       menu: this.menu,

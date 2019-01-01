@@ -24,15 +24,8 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import KateServer from './KateServer';
 
 import Fields from './fields';
-import { makeEntitiesFromStructures } from './server';
+import { makeEntitiesFromStructures, trivialLogger } from './server';
 import Entity from './Entity';
-
-
-const trivialLogger = {
-  info: (...args) => console.log(...args), // eslint-disable-line no-console
-  debug: (...args) => console.log(...args), // eslint-disable-line no-console
-  error: (...args) => console.error(...args), // eslint-disable-line no-console
-};
 
 export default class KateJS {
   constructor({ AppServer, logger }) {

@@ -20,6 +20,11 @@ const translate = {
     'Cancel': 'Отмена',
     'Are you shure?': 'Вы уверены?',
     'Yes': 'Да',
+    'Saved!': 'Сохранено',
+
+    'Auth': 'Авторизация',
+    'Username': 'Имя пользователя',
+    'Password': 'Пароль',
   },
 };
 

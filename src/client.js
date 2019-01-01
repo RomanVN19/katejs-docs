@@ -18,8 +18,10 @@ You should have received a copy of the GNU General Public License
 along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import KateClient, { Elements, Form } from 'kate-client';
-import App from './App';
+import KateClient from 'kate-client';
+import { Elements } from 'kate-form-material-kit-react';
+import Form from './forms/Form';
+import App from './forms/App';
 import Fields from './fields';
 import { ConfirmDialog } from './forms/Dialogs';
 import makeItemForm from './forms/Item';
@@ -36,6 +38,7 @@ const elementsByFields = {
   [Fields.DECIMAL]: Elements.INPUT,
   [Fields.BOOLEAN]: Elements.CHECKBOX,
   [Fields.TEXT]: Elements.INPUT,
+  [Fields.DATE]: Elements.DATE,
 };
 
 export const getElement = (field, form) => {
@@ -65,6 +68,11 @@ export const getElement = (field, form) => {
   }
   if (field.type === Fields.TEXT) {
     element.rows = 5;
+  }
+  if (field.type === Fields.DATE) {
+    element.dateFormat = 'DD.MM.YYYY';
+    element.timeFormat = 'HH:mm';
+    element.closeOnSelect = true;
   }
   return element;
 };
@@ -122,6 +130,16 @@ const KateJSClient = ({ AppClient, translations: userTranslations }) => {
   KateClient({ app: AppClient(App), translations: userTranslations });
 };
 
+const ItemForm = (entity, { addActions = false, addElements = false } = {}) => {
+  const name = Object.keys(entity)[0];
+  return makeItemForm({ structure: entity[name], name, addActions, addElements });
+};
+
+const ListForm = (entity, { addActions = false, addElements = false } = {}) => {
+  const name = Object.keys(entity)[0];
+  return makeListForm({ structure: entity[name], name, addActions, addElements });
+};
+
 
 export {
   App,
@@ -129,6 +147,8 @@ export {
   Elements,
   makeItemForm,
   makeListForm,
+  ItemForm,
+  ListForm,
   use,
   ConfirmDialog,
   translations,

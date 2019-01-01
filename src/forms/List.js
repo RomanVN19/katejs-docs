@@ -1,36 +1,40 @@
-import { Elements, Form } from 'kate-client';
+import { Elements } from 'kate-form-material-kit-react';
+import Form from './Form';
 import { makeTitle } from '../client';
 
-const makeListForm = ({ structure: entity, name }) =>
+const makeListForm = ({ name, addActions = true, addElements = true }) =>
   class ListForm extends Form {
-    static title = makeTitle(entity.name)
-    static path = `/${entity.name}`;
+    static title = makeTitle(name)
+    static path = `/${name}`;
     constructor(args) {
       super(args);
 
-      this.entity = entity.name;
+      this.entity = name;
+      if (addActions) {
+        this.actions = [
+          {
+            id: '__Add',
+            type: Elements.BUTTON,
+            title: 'Add',
+            onClick: this.newItem,
+          },
+        ];
+      }
 
-      this.actions = [
-        {
-          id: '__Add',
-          type: Elements.BUTTON,
-          title: 'Add',
-          onClick: this.newItem,
-        },
-      ];
-
-      this.elements = [
-        {
-          id: 'list',
-          type: Elements.TABLE,
-          rowClick: this.editRow,
-          columns: [
-            { title: 'Title', dataPath: 'title' },
-          ],
-          value: [],
-        },
-      ];
-      setTimeout(this.load, 0);
+      if (addElements) {
+        this.elements = [
+          {
+            id: 'list',
+            type: Elements.TABLE,
+            rowClick: this.editRow,
+            columns: [
+              { title: 'Title', dataPath: 'title' },
+            ],
+            value: [],
+          },
+        ];
+      }
+      setTimeout(this.load, 0); // to process filter from childs
     }
     load = async () => {
       const result = await this.app[name].query({ where: this.filters });

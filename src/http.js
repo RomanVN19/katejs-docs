@@ -65,19 +65,11 @@ export default class Http {
     this.app.use(BodyParser());
     middlewares.forEach(middleware => this.app.use(middleware));
     this.router = new Router();
-    // this.router.get('/', async (ctx) => {
-    //   ctx.body = '<body>Hello, world!</body>';
-    // });
 
-    // this.router.get(`${apiUrl}/:entity`, this.query);
-    // this.router.post(`${apiUrl}/:entity/`, this.post);
-    // this.router.put(`${apiUrl}/:entity/:uuid`, this.put);
-    // this.router.get(`${apiUrl}/:entity/:uuid`, this.get);
-    // this.router.delete(`${apiUrl}/:entity/:uuid`, this.delete);
     this.router.post(apiUrl, this.api);
 
     this.app.use(this.router.routes());
-    this.app.use(Static(`${process.cwd()}/build`));
+    this.app.use(Static(`${process.cwd()}/build`, { hidden: true }));
     this.app.use(async (ctx) => {
       await Send(ctx, '/build/index.html', process.cwd());
     });

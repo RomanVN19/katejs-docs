@@ -29,6 +29,7 @@ export const SequelizeFields = {
   [Fields.DECIMAL]: Sequelize.DECIMAL,
   [Fields.BOOLEAN]: Sequelize.BOOLEAN,
   [Fields.TEXT]: Sequelize.TEXT,
+  [Fields.DATE]: Sequelize.DATE,
 };
 
 const getModelParams = (entity) => {
@@ -132,19 +133,18 @@ export default class Database {
     }
   }
   createModels() {
-    Object.values(this.entities).forEach((entity) => {
+    Object.keys(this.entities).forEach((entityName) => {
+      const entity = this.entities[entityName];
       if (entity.fields) {
         const { params, options } = getModelParams(entity);
-        // eslint-disable-next-line no-param-reassign
-        entity[model] = this.sequelize.define(entity.name, params, options);
-        // eslint-disable-next-line no-param-reassign
+        entity[model] = this.sequelize.define(entityName.toLowerCase(), params, options);
         entity[model].Sequelize = Sequelize;
       }
       if (entity.tables) {
         entity.tables.forEach((table) => {
           const { params: tableParams, options: tableOptions } = getModelParams(table);
           // eslint-disable-next-line no-param-reassign
-          table[model] = this.sequelize.define(`${entity.name}${capitalize(table.name)}`, tableParams, tableOptions);
+          table[model] = this.sequelize.define(`${entityName.toLowerCase()}${capitalize(table.name)}`, tableParams, tableOptions);
         });
       }
     });

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 
 /*
 Copyright © 2018 Roman Nep <neproman@gmail.com>
@@ -52,9 +53,15 @@ export default class KateServer {
       entities[name] = new entitiesClasses[name]({ logger: this.logger, app: this.app });
       this.app[name] = entities[name];
     });
+    this.entities = entities;
+    this.httpParams = httpParams;
     if (databaseParams) {
       this.database = new Database({ databaseParams, entities, logger: this.logger });
     }
+  }
+  run() {
+    const { entities, httpParams } = this;
+
     this.http = new Http({
       httpParams,
       entities,
@@ -64,10 +71,9 @@ export default class KateServer {
 
     Object.keys(entities).forEach((name) => {
       if (entities[name].afterInit) entities[name].afterInit();
-    })
+    });
     if (this.app.afterInit) this.app.afterInit();
-  }
-  run() {
+
     this.logger.info('starting http server...');
     this.http.listen();
     this.logger.info('... http server started at port', this.http.httpParams.port);
@@ -75,8 +81,12 @@ export default class KateServer {
   async syncDatabase() {
     if (this.database) {
       this.logger.info('synchronizing database structure...');
-      await this.database.sync();
-      this.logger.info('...database structure synchronized');
+      try {
+        await this.database.sync();
+        this.logger.info('...database structure synchronized');
+      } finally {
+        process.exit(0);
+      }
     } else {
       this.logger.info('No database params!');
     }
