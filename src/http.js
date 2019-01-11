@@ -20,11 +20,11 @@ along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 
 import Koa from 'koa';
 import Router from 'koa-router';
-import BodyParser from 'koa-bodyparser';
+import koaBody from 'koa-body';
 import Static from 'koa-static';
 import Send from 'koa-send';
 
-const apiUrl = '/api';
+export const apiUrl = '/api/:entity/:method';
 
 const noEntityResponse = (ctx) => {
   ctx.body = { message: 'Can\'t find entity' };
@@ -62,7 +62,7 @@ export default class Http {
       const ms = Date.now() - start;
       logger.info(`${ctx.method} ${ctx.url} ${ctx.status} - ${ms}`);
     });
-    this.app.use(BodyParser());
+    this.app.use(koaBody({ multipart: true }));
     middlewares.forEach(middleware => this.app.use(middleware));
     this.router = new Router();
 
@@ -79,7 +79,8 @@ export default class Http {
   }
   api = async (ctx) => {
     this.logger.debug('api request', ctx.params, ctx.request.body);
-    const { entity, method, data } = ctx.request.body;
+    const { entity, method } = ctx.params;
+    const data = ctx.request.body;
     const entityObject = this.entities[entity];
     if (!entityObject) {
       noEntityResponse(ctx);

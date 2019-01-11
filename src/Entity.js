@@ -46,20 +46,20 @@ export default class Entity {
     Object.assign(this, params);
   }
   async get({ data }) {
-    const item = await this[model].findById(data.uuid, this[modelGetOptions]);
+    const item = await this[model].findByPk(data.uuid, this[modelGetOptions]);
     if (!item) {
       return { error: noItemErr };
     }
-    return { response: item };
+    return { response: item.toJSON() };
   }
   async put({ data }) {
     let item;
     if (data.uuid) {
-      item = await this[model].findById(data.uuid);
+      item = await this[model].findByPk(data.uuid);
       if (!item) {
         return { error: noItemErr };
       }
-      this.logger.debug('item before changes', item.get());
+      this.logger.debug('item before changes', item.toJSON(), 'new values', data.body);
       await item.update(data.body);
     } else {
       item = await this[model].create(data.body);
@@ -68,16 +68,16 @@ export default class Entity {
     if (this.tables) {
       this.tables.forEach(async (table) => {
         if (data.uuid) {
-          await table[model].destroy({ where: { [`${this.name}Uuid`]: item.uuid } });
+          await table[model].destroy({ where: { [`${this[model].Name}Uuid`]: item.uuid } });
         }
         const rows = await table[model].bulkCreate(data.body[table.name] || []);
-        item[`set${capitalize(table.name)}`](rows);
+        await item[`set${capitalize(table.name)}`](rows);
       });
     }
-    return { response: item };
+    return { response: item.toJSON() };
   }
   async delete({ data }) {
-    const item = await this[model].findById(data.uuid, this[modelGetOptions]);
+    const item = await this[model].findByPk(data.uuid, this[modelGetOptions]);
     if (!item) {
       return { error: noItemErr };
     }
@@ -89,6 +89,7 @@ export default class Entity {
     if (data && data.where) {
       data.where = replaceOps(data.where, this[model].Sequelize);
     }
-    return { response: await this[model].findAll({ ...this[modelGetOptions], ...data }) };
+    const result = await this[model].findAll({ ...this[modelGetOptions], ...data });
+    return { response: result.map(item => item.toJSON()) };
   }
 }

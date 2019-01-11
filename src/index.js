@@ -30,12 +30,17 @@ import Entity from './Entity';
 export default class KateJS {
   constructor({ AppServer, logger }) {
     this.logger = logger || trivialLogger;
-    this.server = new KateServer({ App: AppServer, logger: this.logger });
+    this.AppServer = AppServer;
+  }
+  createServer() {
+    this.server = new KateServer({ App: this.AppServer, logger: this.logger });
   }
   syncDatabase() {
+    this.createServer();
     this.server.syncDatabase();
   }
   startServer() {
+    this.createServer();
     this.server.run();
   }
   compileClient() {
@@ -73,14 +78,14 @@ export default class KateJS {
         const info = stats.toJson();
         this.logger.info('Client compiling error!', info.errors);
       } else {
-        this.logger.info('...client compiling done!');
         this.makeIndex();
+        this.logger.info('...client compiling done!');
       }
     });
   }
   makeIndex() {
     const index = fs.readFileSync(`${__dirname}/index.html`, { encoding: 'utf8' });
-    fs.writeFileSync(`${process.cwd()}/build/index.html`, index.replace('%app_title%', this.server.app.title), { encoding: 'utf8' });
+    fs.writeFileSync(`${process.cwd()}/build/index.html`, index.replace('%app_title%', this.AppServer.title), { encoding: 'utf8' });
   }
 }
 

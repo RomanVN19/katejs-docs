@@ -9,7 +9,7 @@
   ],
   "env": {
     "browser": false,
-    "es6": true,
+    "es6": true
   },
   "rules": {
     "no-underscore-dangle": 0,
@@ -18,14 +18,18 @@
     "object-curly-newline": 0
   },
   "globals": {
-      "window": true,
-      "document": true,
-      "navigator": true,
-      "fetch": true,
+    "window": true,
+    "document": true,
+    "navigator": true,
+    "fetch": true
   },
   "settings": {
     "import/resolver": {
-      "babel-module": {}
+      "babel-module": {
+        "root": [
+          "./src"
+        ]
+      }
     }
   }
 }

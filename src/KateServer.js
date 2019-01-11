@@ -59,7 +59,7 @@ export default class KateServer {
       this.database = new Database({ databaseParams, entities, logger: this.logger });
     }
   }
-  run() {
+  async run() {
     const { entities, httpParams } = this;
 
     this.http = new Http({
@@ -74,6 +74,7 @@ export default class KateServer {
     });
     if (this.app.afterInit) this.app.afterInit();
 
+    await this.database.init();
     this.logger.info('starting http server...');
     this.http.listen();
     this.logger.info('... http server started at port', this.http.httpParams.port);

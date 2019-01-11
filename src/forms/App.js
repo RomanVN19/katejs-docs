@@ -50,6 +50,7 @@ export default class PlatformApp extends App {
   static components = components;
   constructor(params) {
     super(params);
+    this.baseUrl = '/api';
     this.layouts = {
       main: {
         component: Layout,
@@ -87,21 +88,17 @@ export default class PlatformApp extends App {
       forms: this.forms,
       addToMenu,
     });
-    this.baseUrl = '/api';
     this.makeApiLinks({ entities: Object.keys(structures) });
   }
+  /* global FormData */
   makeApiLinks({ entities }) {
     const app = this;
     entities.forEach((entity) => {
       this[entity] = new Proxy({}, {
         get(target, prop) {
-          return data => app.request(app.baseUrl, {
+          return data => app.request(`${app.baseUrl}/${entity}/${prop}`, {
             method: 'post',
-            body: JSON.stringify({
-              entity,
-              method: prop,
-              data,
-            }),
+            body: data instanceof FormData ? data : JSON.stringify(data),
           });
         },
         set() {

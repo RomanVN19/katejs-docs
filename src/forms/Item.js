@@ -16,7 +16,9 @@ const makeItemForm = ({ structure, name, addActions = true, addElements = true }
         const elements = (structure.fields || [])
           .filter(field => !field.skipForForm)
           .map(field => getElement(field, this));
-        (structure.tables || []).forEach(table => elements.push(getTableElement(table, this)));
+        (structure.tables || [])
+          .filter(table => !table.skipForForm)
+          .forEach(table => elements.push(getTableElement(table, this)));
         this.elements = elements;
       } else {
         this.elements = [];
@@ -37,12 +39,12 @@ const makeItemForm = ({ structure, name, addActions = true, addElements = true }
             title: 'Save',
             onClick: this.save,
           },
-          {
-            id: '__Load',
-            type: Elements.BUTTON,
-            title: 'Load',
-            onClick: this.load,
-          },
+          // {
+          //   id: '__Load',
+          //   type: Elements.BUTTON,
+          //   title: 'Load',
+          //   onClick: this.load,
+          // },
           {
             id: '__Delete',
             type: Elements.BUTTON,
@@ -60,8 +62,10 @@ const makeItemForm = ({ structure, name, addActions = true, addElements = true }
 
       if (params.id && params.id !== 'new') {
         this.uuid = params.id;
-        this.load();
       }
+    }
+    afterInit() {
+      if (this.uuid) this.load();
     }
     load = async () => {
       const result = await this.app[name].get({ uuid: this.uuid });

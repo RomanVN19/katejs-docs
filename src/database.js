@@ -121,7 +121,6 @@ export default class Database {
       operatorsAliases: false,
     });
     this.entities = entities;
-    this.init();
     this.createModels();
   }
   async init() {
@@ -129,7 +128,9 @@ export default class Database {
       await this.sequelize.authenticate();
       this.logger.info('...connected to database');
     } catch (e) {
-      this.logger.error('...can not connect to database!');
+
+      this.logger.error('...can not connect to database!', e);
+      process.exit(e);
     }
   }
   createModels() {
@@ -139,6 +140,7 @@ export default class Database {
         const { params, options } = getModelParams(entity);
         entity[model] = this.sequelize.define(entityName.toLowerCase(), params, options);
         entity[model].Sequelize = Sequelize;
+        entity[model].Name = entityName;
       }
       if (entity.tables) {
         entity.tables.forEach((table) => {
