@@ -28,9 +28,10 @@ import makeItemForm from './forms/Item';
 import makeListForm from './forms/List';
 import translations from './translations';
 
-export const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
+export const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1).toLowerCase()}`;
 
-export const makeTitle = string => `${capitalize(string)}s`;
+export const makeTitle = string => capitalize(string.replace(/([a-z0-9])([A-Z])/g, '$1 $2'));
+export const makeTitlePlural = string => `${makeTitle(string)}s`;
 
 const elementsByFields = {
   [Fields.STRING]: Elements.INPUT,

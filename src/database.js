@@ -20,7 +20,7 @@ along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 
 import Sequelize from 'sequelize';
 import Fields from './fields';
-import { model, modelGetOptions, capitalize } from './Entity';
+import { model, modelGetOptions, modelUpdateFields, capitalize } from './Entity';
 
 export const SequelizeFields = {
   [Fields.STRING]: Sequelize.STRING,
@@ -49,23 +49,32 @@ const getModelParams = (entity) => {
 
   // eslint-disable-next-line no-param-reassign
   entity[modelGetOptions] = { include: [], attributes: ['uuid', 'createdAt', 'updatedAt'] };
+  // eslint-disable-next-line no-param-reassign
+  entity[modelUpdateFields] = [];
 
   entity.fields.forEach((field) => {
     switch (field.type) {
       case Fields.REFERENCE:
+        entity[modelUpdateFields].push(`${field.name}Uuid`);
+        // need include ref field, because with LIMIT condition
+        // reference join fails without it
+        entity[modelGetOptions].attributes.push(`${field.name}Uuid`);
         modelOptions.setterMethods[field.name] = function setter(value) {
-          if (value && !this.getDataValue(field.name)) {
+          // if (value && !this.getDataValue(field.name)) {
+          if (value) {
             this.setDataValue(`${field.name}Uuid`, value.uuid);
           }
         };
         break;
       case Fields.DECIMAL:
+        entity[modelUpdateFields].push(field.name);
         entity[modelGetOptions].attributes.push(field.name);
         modelParams[field.name] = {
           type: SequelizeFields[field.type](field.length || 15, field.precision || 2),
         };
         break;
       case Fields.BOOLEAN:
+        entity[modelUpdateFields].push(field.name);
         entity[modelGetOptions].attributes.push(field.name);
         modelParams[field.name] = {
           type: SequelizeFields[field.type],
@@ -73,6 +82,7 @@ const getModelParams = (entity) => {
         };
         break;
       default:
+        entity[modelUpdateFields].push(field.name);
         entity[modelGetOptions].attributes.push(field.name);
         modelParams[field.name] = {
           type: SequelizeFields[field.type],
@@ -82,13 +92,14 @@ const getModelParams = (entity) => {
   return { params: modelParams, options: modelOptions };
 };
 
-const makeAssociations = (entities) => {
+const makeAssociations = (entities, logger) => {
   Object.values(entities).forEach((entity) => {
     if (entity.fields) {
       entity.fields.forEach((field) => {
         if (field.type === Fields.REFERENCE) {
           entity[model].belongsTo(entities[field.entity][model], { as: field.name });
           entity[modelGetOptions].include.push({ model: entities[field.entity][model], as: field.name, attributes: ['title', 'uuid'] });
+          if (logger) logger.info('Defined association:', entity[model].Name, field.name, ' - ', entities[field.entity][model].Name);
         }
       });
     }
@@ -98,9 +109,11 @@ const makeAssociations = (entities) => {
           if (field.type === Fields.REFERENCE) {
             table[model].belongsTo(entities[field.entity][model], { as: field.name });
             table[modelGetOptions].include.push({ model: entities[field.entity][model], as: field.name, attributes: ['title', 'uuid'] });
+            if (logger) logger.info('Defined association:', table[model].Name, field.name, ' - ', entities[field.entity][model].Name);
           }
         });
         entity[model].hasMany(table[model], { as: table.name });
+        if (logger) logger.info('Defined association:', entity[model].Name, table.name, ' ->>', table[model].Name);
         entity[modelGetOptions].include.push({
           model: table[model],
           as: table.name,
@@ -141,16 +154,22 @@ export default class Database {
         entity[model] = this.sequelize.define(entityName.toLowerCase(), params, options);
         entity[model].Sequelize = Sequelize;
         entity[model].Name = entityName;
+        this.logger.info('Defined model:', entityName.toLowerCase());
       }
       if (entity.tables) {
         entity.tables.forEach((table) => {
           const { params: tableParams, options: tableOptions } = getModelParams(table);
+          if (table[model]) {
+            this.logger.error(`Error: table ${entityName}.${table.name} already has model!`);
+          }
           // eslint-disable-next-line no-param-reassign
           table[model] = this.sequelize.define(`${entityName.toLowerCase()}${capitalize(table.name)}`, tableParams, tableOptions);
+          table[model].Name = `${entityName.toLowerCase()}${capitalize(table.name)}`;
+          this.logger.info('Defined model:', table[model].Name);
         });
       }
     });
-    makeAssociations(this.entities);
+    makeAssociations(this.entities, this.logger);
   }
   async sync() {
     await this.sequelize.sync({ alter: true });

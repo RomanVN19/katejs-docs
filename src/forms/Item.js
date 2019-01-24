@@ -3,11 +3,18 @@ import Form from './Form';
 import { ConfirmDialog } from './Dialogs';
 import { getElement, getTableElement } from '../client';
 
+const ok = Symbol('ok');
+const load = Symbol('load');
+const save = Symbol('save');
+const del = Symbol('delete');
+const close = Symbol('close');
+
 const makeItemForm = ({ structure, name, addActions = true, addElements = true }) =>
   class ItemForm extends Form {
     static title = name;
     static path = `/${name}/:id`;
-    static structure = structure
+    static structure = structure;
+    static entity = name;
     constructor(args) {
       super(args);
       const { params } = args;
@@ -31,13 +38,15 @@ const makeItemForm = ({ structure, name, addActions = true, addElements = true }
             id: '__OK',
             type: Elements.BUTTON,
             title: 'OK',
-            onClick: this.ok,
+            onClick: this[ok],
+            disabled: false,
           },
           {
             id: '__Save',
             type: Elements.BUTTON,
             title: 'Save',
-            onClick: this.save,
+            onClick: this[save],
+            disabled: false,
           },
           // {
           //   id: '__Load',
@@ -49,13 +58,15 @@ const makeItemForm = ({ structure, name, addActions = true, addElements = true }
             id: '__Delete',
             type: Elements.BUTTON,
             title: 'Delete',
-            onClick: this.delete,
+            onClick: this[del],
+            disabled: false,
           },
           {
             id: '__Close',
             type: Elements.BUTTON,
             title: 'Close',
-            onClick: this.close,
+            onClick: this[close],
+            disabled: false,
           },
         ];
       }
@@ -67,13 +78,15 @@ const makeItemForm = ({ structure, name, addActions = true, addElements = true }
     afterInit() {
       if (this.uuid) this.load();
     }
-    load = async () => {
+    async load() {
       const result = await this.app[name].get({ uuid: this.uuid });
       if (result.response) {
         this.setValues(result.response);
+        return result.response;
       }
+      return null;
     }
-    save = async () => {
+    async save() {
       const data = this.getValues();
       const result = await this.app[name].put({ body: data, uuid: this.uuid });
 
@@ -85,10 +98,7 @@ const makeItemForm = ({ structure, name, addActions = true, addElements = true }
         this.app.showAlert({ type: 'warning', title: result.error.message });
       }
     }
-    close = () => {
-      this.app.open(`${name}List`);
-    }
-    delete = async () => {
+    async delete() {
       if (!await this.content.confirmDialog.confirm({ title: 'Are you shure?' })) return;
       const result = await this.app[name].delete({ uuid: this.uuid });
       if (result.response) {
@@ -99,10 +109,16 @@ const makeItemForm = ({ structure, name, addActions = true, addElements = true }
         this.app.showAlert({ type: 'warning', title: result.error.message });
       }
     }
-    ok = async () => {
-      await this.save();
-      this.close();
+    [close] = () => {
+      this.app.open(`${name}List`);
     }
+    [ok] = async () => {
+      await this.save();
+      this[close]();
+    }
+    [load] = () => this.load();
+    [save] = () => this.save();
+    [del] = () => this.delete();
   };
 
 export default makeItemForm;

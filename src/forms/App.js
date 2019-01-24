@@ -18,12 +18,15 @@ You should have received a copy of the GNU General Public License
 along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ProxyPolyfill from 'proxy-polyfill/src/proxy';
 import { App } from 'kate-client';
 import { Layout, components } from 'kate-form-material-kit-react';
 
 import { makeItemForm, makeListForm } from '../client';
 import Menu, { setMenu } from './Menu';
 import Alerts, { showAlert } from './Alerts';
+
+const ProxyP = ProxyPolyfill();
 
 const makeFormsFromStructure = ({ structures, menu, forms: allForms, addToMenu }) => {
   Object.keys(structures).forEach((key) => {
@@ -51,6 +54,7 @@ export default class PlatformApp extends App {
   constructor(params) {
     super(params);
     this.baseUrl = '/api';
+    this.paginationLimit = 20;
     this.layouts = {
       main: {
         component: Layout,
@@ -68,6 +72,8 @@ export default class PlatformApp extends App {
         alerts: 'A',
       },
     };
+
+    this.entityMethods = {}; // for Proxy polyfill
   }
   setMenu(menu) {
     if (this[setMenu]) {
@@ -88,13 +94,13 @@ export default class PlatformApp extends App {
       forms: this.forms,
       addToMenu,
     });
-    this.makeApiLinks({ entities: Object.keys(structures) });
+    this.makeApiLinks({ entities: Object.keys(structures), methods: this.entityMethods });
   }
   /* global FormData */
-  makeApiLinks({ entities }) {
+  makeApiLinks({ entities, methods = {} }) {
     const app = this;
     entities.forEach((entity) => {
-      this[entity] = new Proxy({}, {
+      const proxyHandlers = {
         get(target, prop) {
           return data => app.request(`${app.baseUrl}/${entity}/${prop}`, {
             method: 'post',
@@ -104,7 +110,19 @@ export default class PlatformApp extends App {
         set() {
           return true;
         },
-      });
+      };
+      if (window.Proxy) {
+        this[entity] = new Proxy({}, proxyHandlers);
+      } else {
+        // set entity methods to proxy polyfill
+        const entityMethods = { get: true, query: true, put: true, delete: true };
+        if (methods[entity]) {
+          methods[entity].forEach((method) => {
+            entityMethods[method] = true;
+          });
+        }
+        this[entity] = new ProxyP(entityMethods, proxyHandlers);
+      }
     });
   }
 }

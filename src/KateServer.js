@@ -37,6 +37,7 @@ class AppServer {
       host: '0.0.0.0',
     };
     this.httpMidlewares = [];
+    this.paginationLimit = 20;
   }
 }
 

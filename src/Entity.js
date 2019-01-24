@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 
 /*
 Copyright © 2018 Roman Nep <neproman@gmail.com>
@@ -20,6 +21,7 @@ along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 
 export const model = Symbol('model');
 export const modelGetOptions = Symbol('modelGetOptions');
+export const modelUpdateFields = Symbol('modelUpdateFields');
 
 export const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
 
@@ -32,7 +34,7 @@ const replaceOps = (obj, S) => {
     if (key[0] === '$') {
       newKey = S.Op[key.substr(1)];
     }
-    if (typeof obj[key] === 'object') {
+    if (typeof obj[key] === 'object' && obj[key]) {
       result[newKey] = replaceOps(obj[key], S);
     } else {
       result[newKey] = obj[key];
@@ -52,15 +54,17 @@ export default class Entity {
     }
     return { response: item.toJSON() };
   }
-  async put({ data }) {
+  async put({ data, ctx }) {
     let item;
     if (data.uuid) {
-      item = await this[model].findByPk(data.uuid);
+      item = await this[model].findByPk(data.uuid, this[modelGetOptions]);
       if (!item) {
         return { error: noItemErr };
       }
-      this.logger.debug('item before changes', item.toJSON(), 'new values', data.body);
-      await item.update(data.body);
+      if (ctx) { // can be called from another entity without ctx
+        ctx.state.savedEntity = item.toJSON();
+      }
+      await item.update(data.body, { fields: this[modelUpdateFields] });
     } else {
       item = await this[model].create(data.body);
     }
@@ -84,8 +88,12 @@ export default class Entity {
     await item.destroy();
     return { response: { ok: true } };
   }
-  async query(params) {
-    const { data } = params || {};
+  async query({ data = {} } = { data: {} }) {
+    if (this.app.paginationLimit) {
+      const { page = 1 } = data || {};
+      data.offset = (page - 1) * this.app.paginationLimit;
+      data.limit = this.app.paginationLimit;
+    }
     if (data && data.where) {
       data.where = replaceOps(data.where, this[model].Sequelize);
     }

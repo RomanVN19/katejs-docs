@@ -51,7 +51,7 @@ export default class Http {
           await next();
         } else {
           ctx.set('Access-Control-Allow-Methods', '*');
-          ctx.set('Access-Control-Allow-Headers', '*');
+          ctx.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, *');
           ctx.status = 204;
         }
       });
