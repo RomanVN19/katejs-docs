@@ -31,7 +31,7 @@ const Task = { // Имя сущности
   ],
 };
 
-export const title = 'Task manager'; // Имя приложения
+export const title = 'Task manager'; // Заголовок приложения
 export const packageName = 'task-manager'; // Имя пакета
 export const structures = { // Объект с сущностями
   Task, // где ключ - имя сущности
