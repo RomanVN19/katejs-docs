@@ -28,12 +28,14 @@ import { makeEntitiesFromStructures, trivialLogger } from './server';
 import Entity from './Entity';
 
 export default class KateJS {
-  constructor({ AppServer, logger }) {
+  constructor({ AppServer, logger, database, http }) {
     this.logger = logger || trivialLogger;
     this.AppServer = AppServer;
+    this.database = database;
+    this.http = http;
   }
   createServer() {
-    this.server = new KateServer({ App: this.AppServer, logger: this.logger });
+    this.server = new KateServer(this);
   }
   syncDatabase() {
     this.createServer();

@@ -22,6 +22,7 @@ along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 export const model = Symbol('model');
 export const modelGetOptions = Symbol('modelGetOptions');
 export const modelUpdateFields = Symbol('modelUpdateFields');
+export const tables = Symbol('tables');
 
 export const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
 
@@ -47,57 +48,89 @@ export default class Entity {
   constructor(params) {
     Object.assign(this, params);
   }
-  async get({ data }) {
-    const item = await this[model].findByPk(data.uuid, this[modelGetOptions]);
+  transaction() {
+    return this[model].db.sequelize.transaction();
+  }
+  async get({ data, transaction }) {
+    const item = await this[model].findByPk(data.uuid, { ...this[modelGetOptions], transaction });
     if (!item) {
       return { error: noItemErr };
     }
     return { response: item.toJSON() };
   }
-  async put({ data, ctx }) {
-    let item;
-    if (data.uuid) {
-      item = await this[model].findByPk(data.uuid, this[modelGetOptions]);
+  async put({ data, ctx, transaction: t }) {
+    let transaction;
+    try {
+      transaction = t || await this[model].db.sequelize.transaction();
+      let item;
+      if (data.uuid) {
+        item = await this[model].findByPk(data.uuid, { ...this[modelGetOptions], transaction });
+        if (!item) {
+          return { error: noItemErr };
+        }
+        if (ctx) { // can be called from another entity without ctx
+          ctx.state.savedEntity = item.toJSON();
+        }
+        await item.update(data.body, { fields: this[modelUpdateFields], transaction });
+      } else {
+        item = await this[model].create(data.body, { transaction });
+      }
+
+      if (this.tables) {
+        await Promise.all(this.tables.map(async (table) => {
+          if (data.uuid) {
+            await table[model].destroy({
+              where: { [`${this[model].Name}Uuid`]: item.uuid },
+              transaction,
+            });
+          }
+          const rows = await table[model].bulkCreate(data.body[table.name] || [], { transaction });
+          await item[`set${capitalize(table.name)}`](rows, { transaction });
+        }));
+      }
+      if (!t) {
+        await transaction.commit();
+      }
+      return { response: item.toJSON() };
+    } catch (error) {
+      this.logger.error(error);
+      if (transaction) {
+        await transaction.rollback();
+      }
+      return { error };
+    }
+  }
+  async delete({ data, transaction: t }) {
+    let transaction;
+    try {
+      transaction = t || await this[model].db.sequelize.transaction();
+      const item = await this[model].findByPk(data.uuid, { ...this[modelGetOptions], transaction });
       if (!item) {
         return { error: noItemErr };
       }
-      if (ctx) { // can be called from another entity without ctx
-        ctx.state.savedEntity = item.toJSON();
+      await item.destroy({ transaction });
+      if (!t) {
+        await transaction.commit();
       }
-      await item.update(data.body, { fields: this[modelUpdateFields] });
-    } else {
-      item = await this[model].create(data.body);
+      return { response: { ok: true } };
+    } catch (error) {
+      this.logger.error(error);
+      if (transaction) {
+        await transaction.rollback();
+      }
+      return { error };
     }
-
-    if (this.tables) {
-      this.tables.forEach(async (table) => {
-        if (data.uuid) {
-          await table[model].destroy({ where: { [`${this[model].Name}Uuid`]: item.uuid } });
-        }
-        const rows = await table[model].bulkCreate(data.body[table.name] || []);
-        await item[`set${capitalize(table.name)}`](rows);
-      });
-    }
-    return { response: item.toJSON() };
   }
-  async delete({ data }) {
-    const item = await this[model].findByPk(data.uuid, this[modelGetOptions]);
-    if (!item) {
-      return { error: noItemErr };
-    }
-    await item.destroy();
-    return { response: { ok: true } };
-  }
-  async query({ data = {} } = { data: {} }) {
+  async query({ data = {}, transaction } = { data: {} }) {
     if (this.app.paginationLimit) {
       const { page = 1 } = data || {};
       data.offset = (page - 1) * this.app.paginationLimit;
       data.limit = this.app.paginationLimit;
     }
     if (data && data.where) {
-      data.where = replaceOps(data.where, this[model].Sequelize);
+      data.where = replaceOps(data.where, this[model].db.Sequelize);
     }
-    const result = await this[model].findAll({ ...this[modelGetOptions], ...data });
+    const result = await this[model].findAll({ ...this[modelGetOptions], ...data, transaction });
     return { response: result.map(item => item.toJSON()) };
   }
 }

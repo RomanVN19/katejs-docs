@@ -20,7 +20,7 @@ along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 
 import Sequelize from 'sequelize';
 import Fields from './fields';
-import { model, modelGetOptions, modelUpdateFields, capitalize } from './Entity';
+import { model, modelGetOptions, modelUpdateFields, capitalize, tables } from './Entity';
 
 export const SequelizeFields = {
   [Fields.STRING]: Sequelize.STRING,
@@ -32,7 +32,7 @@ export const SequelizeFields = {
   [Fields.DATE]: Sequelize.DATE,
 };
 
-const getModelParams = (entity) => {
+const getModelParams = (entity, structure) => {
   const modelParams = {
     uuid: {
       type: Sequelize.UUID,
@@ -52,7 +52,7 @@ const getModelParams = (entity) => {
   // eslint-disable-next-line no-param-reassign
   entity[modelUpdateFields] = [];
 
-  entity.fields.forEach((field) => {
+  structure.fields.forEach((field) => {
     switch (field.type) {
       case Fields.REFERENCE:
         entity[modelUpdateFields].push(`${field.name}Uuid`);
@@ -94,8 +94,8 @@ const getModelParams = (entity) => {
 
 const makeAssociations = (entities, logger) => {
   Object.values(entities).forEach((entity) => {
-    if (entity.fields) {
-      entity.fields.forEach((field) => {
+    if (entity.structure && entity.structure.fields) {
+      entity.structure.fields.forEach((field) => {
         if (field.type === Fields.REFERENCE) {
           entity[model].belongsTo(entities[field.entity][model], { as: field.name });
           entity[modelGetOptions].include.push({ model: entities[field.entity][model], as: field.name, attributes: ['title', 'uuid'] });
@@ -103,20 +103,21 @@ const makeAssociations = (entities, logger) => {
         }
       });
     }
-    if (entity.tables) {
-      entity.tables.forEach((table) => {
-        table.fields.forEach((field) => {
+    if (entity.structure && entity.structure.tables) {
+      entity.structure.tables.forEach((tableStructure) => {
+        const table = entity[tables][tableStructure.name];
+        tableStructure.fields.forEach((field) => {
           if (field.type === Fields.REFERENCE) {
             table[model].belongsTo(entities[field.entity][model], { as: field.name });
             table[modelGetOptions].include.push({ model: entities[field.entity][model], as: field.name, attributes: ['title', 'uuid'] });
             if (logger) logger.info('Defined association:', table[model].Name, field.name, ' - ', entities[field.entity][model].Name);
           }
         });
-        entity[model].hasMany(table[model], { as: table.name });
-        if (logger) logger.info('Defined association:', entity[model].Name, table.name, ' ->>', table[model].Name);
+        entity[model].hasMany(table[model], { as: tableStructure.name });
+        if (logger) logger.info('Defined association:', entity[model].Name, tableStructure.name, ' ->>', table[model].Name);
         entity[modelGetOptions].include.push({
           model: table[model],
-          as: table.name,
+          as: tableStructure.name,
           include: table[modelGetOptions].include,
           attributes: table[modelGetOptions].attributes,
         });
@@ -133,6 +134,7 @@ export default class Database {
       dialect: 'mysql',
       operatorsAliases: false,
     });
+    this.Sequelize = Sequelize;
     this.entities = entities;
     this.createModels();
   }
@@ -149,22 +151,22 @@ export default class Database {
   createModels() {
     Object.keys(this.entities).forEach((entityName) => {
       const entity = this.entities[entityName];
-      if (entity.fields) {
-        const { params, options } = getModelParams(entity);
+      if (entity.structure && entity.structure.fields) {
+        const { params, options } = getModelParams(entity, entity.structure);
         entity[model] = this.sequelize.define(entityName.toLowerCase(), params, options);
-        entity[model].Sequelize = Sequelize;
+        entity[model].db = this;
         entity[model].Name = entityName;
         this.logger.info('Defined model:', entityName.toLowerCase());
       }
-      if (entity.tables) {
-        entity.tables.forEach((table) => {
-          const { params: tableParams, options: tableOptions } = getModelParams(table);
-          if (table[model]) {
-            this.logger.error(`Error: table ${entityName}.${table.name} already has model!`);
-          }
+      if (entity.structure && entity.structure.tables) {
+        entity[tables] ={};
+        entity.structure.tables.forEach((tableStructure) => {
+          const table = {};
+          entity[tables][tableStructure.name] = table;
+          const { params: tableParams, options: tableOptions } = getModelParams(table, tableStructure);
           // eslint-disable-next-line no-param-reassign
-          table[model] = this.sequelize.define(`${entityName.toLowerCase()}${capitalize(table.name)}`, tableParams, tableOptions);
-          table[model].Name = `${entityName.toLowerCase()}${capitalize(table.name)}`;
+          table[model] = this.sequelize.define(`${entityName.toLowerCase()}${capitalize(tableStructure.name)}`, tableParams, tableOptions);
+          table[model].Name = `${entityName.toLowerCase()}${capitalize(tableStructure.name)}`;
           this.logger.info('Defined model:', table[model].Name);
         });
       }

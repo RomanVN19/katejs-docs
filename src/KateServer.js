@@ -42,12 +42,12 @@ class AppServer {
 }
 
 export default class KateServer {
-  constructor({ App, logger }) {
+  constructor({ AppServer: App, logger, database: databaseParams, http: httpParams }) {
     this.logger = logger || trivialLogger;
 
     this.logger.info('Creating KateServer...');
     this.app = new (App(AppServer))({ logger: this.logger });
-    const { databaseParams, httpParams, entities: entitiesClasses } = this.app;
+    const { entities: entitiesClasses } = this.app;
     const entities = {};
     if (this.app.beforeInit) this.app.beforeInit();
     Object.keys(entitiesClasses).forEach((name) => {

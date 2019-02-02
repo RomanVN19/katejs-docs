@@ -45,15 +45,16 @@ const elementsByFields = {
 export const getElement = (field, form) => {
   const element = {
     id: field.name,
-    title: capitalize(field.name),
+    title: makeTitle(field.name),
     type: elementsByFields[field.type],
   };
   if (field.type === Fields.REFERENCE) {
     const getFuncName = `getOptions${capitalize(field.entity)}`;
     if (!form[getFuncName]) {
       // eslint-disable-next-line no-param-reassign
-      form[getFuncName] = async () => {
-        const { response } = await form.app[field.entity].query();
+      form[getFuncName] = async (query) => {
+        const where = query && { title: { $like: `%${query}%` } };
+        const { response } = await form.app[field.entity].query({ where });
         return response;
       };
     }
@@ -100,7 +101,7 @@ export const getTableElement = (table, form) => {
   const cardElement = {
     id: `${table.name}Card`,
     type: Elements.CARD,
-    title: capitalize(table.name),
+    title: makeTitle(table.name),
     elements: [
       {
         type: Elements.CARD_ACTIONS,

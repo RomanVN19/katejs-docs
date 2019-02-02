@@ -102,7 +102,7 @@ const makeItemForm = ({ structure, name, addActions = true, addElements = true }
       if (!await this.content.confirmDialog.confirm({ title: 'Are you shure?' })) return;
       const result = await this.app[name].delete({ uuid: this.uuid });
       if (result.response) {
-        this.close();
+        this[close]();
         this.app.showAlert({ type: 'success', title: 'Deleted!' });
       }
       if (result.error) {

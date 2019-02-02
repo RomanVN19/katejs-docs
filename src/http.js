@@ -91,7 +91,7 @@ export default class Http {
       return;
     }
 
-    const { response, error } = await entityObject[method]({ data, ctx });
+    const { response, error } = (await entityObject[method]({ data, ctx })) || { error: { message: 'no response'}};
     ctx.body = response || error;
     ctx.status = error ? (error.status || 500) : 200;
   }

@@ -78,6 +78,12 @@ export default class PlatformApp extends App {
   setMenu(menu) {
     if (this[setMenu]) {
       this[setMenu](menu);
+    } else { // to process setMenu from constructor
+      setTimeout(() => {
+        if (this[setMenu]) {
+          this[setMenu](menu);
+        }
+      }, 0);
     }
   }
   showAlert(params) {
@@ -94,11 +100,12 @@ export default class PlatformApp extends App {
       forms: this.forms,
       addToMenu,
     });
-    this.makeApiLinks({ entities: Object.keys(structures), methods: this.entityMethods });
+    this.makeApiLinks({ entities: Object.keys(structures) });
   }
   /* global FormData */
-  makeApiLinks({ entities, methods = {} }) {
+  makeApiLinks({ entities }) {
     const app = this;
+    const methods = this.entityMethods;
     entities.forEach((entity) => {
       const proxyHandlers = {
         get(target, prop) {
