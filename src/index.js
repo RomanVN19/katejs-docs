@@ -87,7 +87,7 @@ export default class KateJS {
   }
   makeIndex() {
     const index = fs.readFileSync(`${__dirname}/index.html`, { encoding: 'utf8' });
-    fs.writeFileSync(`${process.cwd()}/build/index.html`, index.replace('%app_title%', this.AppServer.title), { encoding: 'utf8' });
+    fs.writeFileSync(`${process.cwd()}/build/index.html`, index.replace('%app_title%', this.server.app.constructor.title), { encoding: 'utf8' });
   }
 }
 
