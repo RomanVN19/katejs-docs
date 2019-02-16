@@ -22,7 +22,6 @@
 import Fields from 'katejs/lib/fields';
 
 const Task = { // Имя сущности
-  name: 'task', // служебное имя сущности для работы с БД
   fields: [ // Массив полей
     {
       name: 'title',

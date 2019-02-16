@@ -129,7 +129,7 @@ this.app.open('ItemForm');
 ## `content`
 При инициализации формы создается служебное поле `content` которое можно использовать
 в событиях элементов формы для изменения их поведения. С помощью этого поля
-можно в простом виде прочитать или переопределить любое поле любого элемента формы по его `id`.
+можно в простом виде прочитать или задать любое поле любого элемента формы по его `id`.
 В общем случае это делается как `this.content.someElementId.somePropertyId`.
 ````
   constructor() {
@@ -142,7 +142,7 @@ this.app.open('ItemForm');
       {
         type: Elements.BUTTON,
         onClick: this.checkInput,
-        title: 'Checl input',
+        title: 'Check input',
       }
     ];
   }
