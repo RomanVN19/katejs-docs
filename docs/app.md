@@ -1,13 +1,10 @@
-# KateJS - Приложение
+---
+layout: default
+title: Проиложение
+nav_order: 3
+---
 
-- [Концепция](https://github.com/romannep/katejs/blob/master/docs/README.md)
-- Приложение
-- [Структура](https://github.com/romannep/katejs/blob/master/docs/structure.md)
-- [Серверное приложение](https://github.com/romannep/katejs/blob/master/docs/server.md)
-- [Сушность](https://github.com/romannep/katejs/blob/master/docs/entity.md)
-- [Клиентское приложение](https://github.com/romannep/katejs/blob/master/docs/client.md)
-- [Форма](https://github.com/romannep/katejs/blob/master/docs/form.md)
-- [Элементы](https://github.com/romannep/katejs/blob/master/docs/elements.md)
+# KateJS - Приложение
 
 ## Требования
 

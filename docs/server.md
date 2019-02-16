@@ -1,14 +1,9 @@
+---
+layout: default
+title: Серверное приложение
+nav_order: 5
+---
 # KateJS - Серверное приложение
-
-- [Концепция](https://github.com/romannep/katejs/blob/master/docs/README.md)
-- [Приложение](https://github.com/romannep/katejs/blob/master/docs/app.md)
-- [Структура](https://github.com/romannep/katejs/blob/master/docs/structure.md)
-- Серверное приложение
-- [Сушность](https://github.com/romannep/katejs/blob/master/docs/entity.md)
-- [Клиентское приложение](https://github.com/romannep/katejs/blob/master/docs/client.md)
-- [Форма](https://github.com/romannep/katejs/blob/master/docs/form.md)
-- [Элементы](https://github.com/romannep/katejs/blob/master/docs/elements.md)
-
 
 Серверное приложение определяет набор сущностей и
 является разделяемым контекстом для них.

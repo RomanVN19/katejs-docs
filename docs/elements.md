@@ -1,15 +1,13 @@
+---
+layout: default
+title: Структура
+nav_order: 9
+---
+
 # KateJS - Элементы формы
 
-- [Концепция](https://github.com/romannep/katejs/blob/master/docs/README.md)
-- [Приложение](https://github.com/romannep/katejs/blob/master/docs/app.md)
-- [Структура](https://github.com/romannep/katejs/blob/master/docs/structure.md)
-- [Серверное приложение](https://github.com/romannep/katejs/blob/master/docs/server.md)
-- [Сушность](https://github.com/romannep/katejs/blob/master/docs/entity.md)
-- [Клиентское приложение](https://github.com/romannep/katejs/blob/master/docs/client.md)
-- [Форма](https://github.com/romannep/katejs/blob/master/docs/form.md)
-- Элементы
-
 ## Общие атрибуты
+Указаные атрибуты могут быть указаны в любом элементе
 ````
 {
   id: 'someId',

@@ -1,14 +1,10 @@
+---
+layout: default
+title: Сущность
+nav_order: 6
+---
+
 # KateJS - Сущность
-
-- [Концепция](https://github.com/romannep/katejs/blob/master/docs/README.md)
-- [Приложение](https://github.com/romannep/katejs/blob/master/docs/app.md)
-- [Структура](https://github.com/romannep/katejs/blob/master/docs/structure.md)
-- [Серверное приложение](https://github.com/romannep/katejs/blob/master/docs/server.md)
-- Сушность
-- [Клиентское приложение](https://github.com/romannep/katejs/blob/master/docs/client.md)
-- [Форма](https://github.com/romannep/katejs/blob/master/docs/form.md)
-- [Элементы](https://github.com/romannep/katejs/blob/master/docs/elements.md)
-
 
 Сущность является структурной единицей серверного приложения
 и представляет собой класс с набором методов, которые вызываются

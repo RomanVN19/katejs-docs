@@ -1,13 +1,10 @@
-# KateJS - Структура
+---
+layout: default
+title: Структура
+nav_order: 4
+---
 
-- [Концепция](https://github.com/romannep/katejs/blob/master/docs/README.md)
-- [Приложение](https://github.com/romannep/katejs/blob/master/docs/app.md)
-- Структура
-- [Серверное приложение](https://github.com/romannep/katejs/blob/master/docs/server.md)
-- [Сушность](https://github.com/romannep/katejs/blob/master/docs/entity.md)
-- [Клиентское приложение](https://github.com/romannep/katejs/blob/master/docs/client.md)
-- [Форма](https://github.com/romannep/katejs/blob/master/docs/form.md)
-- [Элементы](https://github.com/romannep/katejs/blob/master/docs/elements.md)
+# KateJS - Структура
 
 
 Набор структур определяет хранение данных в СУБД.
