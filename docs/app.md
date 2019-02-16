@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Проиложение
+title: Приложение
 nav_order: 3
 ---
 
