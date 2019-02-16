@@ -2,4 +2,4 @@
 
 KateJS - фреймворк разработки бизнес приложений.
 
-[Документация](https://github.com/romannep/katejs/blob/master/docs/README.md)
+[Документация](https://github.com/romannep/katejs/blob/master/docs/concept.md)
