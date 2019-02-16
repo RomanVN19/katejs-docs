@@ -1,6 +1,6 @@
 # KateJS - концепция.
 
-- [Концепция](https://github.com/romannep/katejs/blob/master/docs/README.md)
+- Концепция
 - [Приложение](https://github.com/romannep/katejs/blob/master/docs/app.md)
 - [Структура](https://github.com/romannep/katejs/blob/master/docs/structure.md)
 - [Серверное приложение](https://github.com/romannep/katejs/blob/master/docs/server.md)

@@ -1,4 +1,4 @@
-# Элементы формы
+# KateJS - Элементы формы
 
 - [Концепция](https://github.com/romannep/katejs/blob/master/docs/README.md)
 - [Приложение](https://github.com/romannep/katejs/blob/master/docs/app.md)
