@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Структура
+title: Форма
 nav_order: 8
 ---
 

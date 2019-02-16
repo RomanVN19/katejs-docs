@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Структура
+title: Элементы формы
 nav_order: 9
 ---
 
