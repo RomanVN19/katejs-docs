@@ -29,24 +29,21 @@ const trivialLogger = {
 };
 
 class AppServer {
-  constructor({ logger }) {
+  constructor({ logger, env }) {
     this.logger = logger;
+    this.env = env;
     this.entities = {};
-    this.httpParams = {
-      port: 2000,
-      host: '0.0.0.0',
-    };
     this.httpMidlewares = [];
     this.paginationLimit = 20;
   }
 }
 
 export default class KateServer {
-  constructor({ AppServer: App, logger, database: databaseParams, http: httpParams }) {
+  constructor({ AppServer: App, logger, database: databaseParams, http: httpParams, env }) {
     this.logger = logger || trivialLogger;
 
     this.logger.info('Creating KateServer...');
-    this.app = new (App(AppServer))({ logger: this.logger });
+    this.app = new (App(AppServer))({ logger: this.logger, env });
     const { entities: entitiesClasses } = this.app;
     const entities = {};
     if (this.app.beforeInit) this.app.beforeInit();

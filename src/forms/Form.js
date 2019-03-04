@@ -23,6 +23,7 @@ export default class KateJSForm extends Form {
     };
     if (this.actions) {
       formData.elements.push({
+        id: 'actions',
         type: Elements.CARD_ACTIONS,
         elements: this.actions,
       });

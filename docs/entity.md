@@ -18,6 +18,9 @@ nav_order: 6
 
 ````
 export default class Test {
+  constructor(args) {
+    Object.assign(this, args); // save app, logger to 'this'
+  }  
   test() {
     console.log('This is test method of entity Test');
   }
@@ -131,6 +134,35 @@ export default class Template extends Entity {
 `async transaction()` - старт транзакции
 Возвращает
 - `transaction` - объект транзации.
+
+### Варианты условий в выборке записей Entity.query
+Выборка записей включает связанные таблицы, поэтому есть возможность
+выбирать с уловиями на вложенные поля.
+
+Выборка по условию на элемент в таблице сущности:
+````
+const where = { '$roles.role.uuid$': role.uuid };
+````
+
+Упорядочить по атрибуту ссылочного поля
+````
+const order = [['district', 'title']];
+````
+
+Для агрегирования данных также можно использовать метод query
+используя вспомогательные ключи `$func` и `$col` как способ
+указания `Sequelize.fn` и `Sequelize.col`.
+
+Пример: запрос по сущности `Order` по таблице `products` c числовыми
+полями `amount`, `sum` и ссылочным `product`.
+````
+        attributes: [
+          [{ $func: { fn: 'SUM', col: 'products.amount' } }, 'amount'],
+          [{ $func: { fn: 'SUM', col: 'products.sum' } }, 'sum'],
+        ],
+        group: [{ $col: 'products->product.uuid' }],
+        order: [{ $col: 'products->product.title' }],
+````
 
 ### Транзакции
 

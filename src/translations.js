@@ -10,7 +10,7 @@ const translate = {
     'Fill': 'Заполнить',
     'Logout': 'Выход',
 
-    'Title': 'Заголовок',
+    'Title': 'Наименование',
 
     'Add': 'Добавить',
     'Save': 'Сохранить',
@@ -18,7 +18,7 @@ const translate = {
     'Delete': 'Удалить',
     'Close': 'Закрыть',
     'Cancel': 'Отмена',
-    'Are you shure?': 'Вы уверены?',
+    'Are you sure?': 'Вы уверены?',
     'Yes': 'Да',
     'Saved!': 'Сохранено',
 

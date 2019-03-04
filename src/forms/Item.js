@@ -1,7 +1,7 @@
 import { Elements } from 'kate-form-material-kit-react';
 import Form from './Form';
 import { ConfirmDialog } from './Dialogs';
-import { getElement, getTableElement } from '../client';
+import { getElement, getTableElement, makeTitle } from '../client';
 
 const ok = Symbol('ok');
 const load = Symbol('load');
@@ -11,8 +11,7 @@ const close = Symbol('close');
 
 const makeItemForm = ({ structure, name, addActions = true, addElements = true }) =>
   class ItemForm extends Form {
-    static title = name;
-    static path = `/${name}/:id`;
+    static title = makeTitle(name);
     static structure = structure;
     static entity = name;
     constructor(args) {
@@ -99,7 +98,7 @@ const makeItemForm = ({ structure, name, addActions = true, addElements = true }
       }
     }
     async delete() {
-      if (!await this.content.confirmDialog.confirm({ title: 'Are you shure?' })) return;
+      if (!await this.content.confirmDialog.confirm({ title: 'Are you sure?' })) return;
       const result = await this.app[name].delete({ uuid: this.uuid });
       if (result.response) {
         this[close]();

@@ -103,11 +103,18 @@ export const structures = { // Объект с сущностями
 ````
 
 ### Дата
-
+Дата и время
 ````
 {
   name: 'deliveryAt',
   type: Fields.DATE,
+},
+````
+Дата - только дата
+````
+{
+  name: 'deliveryAt',
+  type: Fields.DATEONLY,
 },
 ````
 
@@ -118,5 +125,15 @@ export const structures = { // Объект с сущностями
   name: 'project',
   type: Fields.REFERENCE,
   entity: 'Project',
+},
+````
+При выборке данных ссылочное поле приходит как `{ uuid, title }`. 
+При необходимости можно явным образом указать перечень выбираемых полей:
+````
+{
+  name: 'project',
+  type: Fields.REFERENCE,
+  entity: 'Project',
+  attributes: ['title', 'uuid', 'startDate'],
 },
 ````

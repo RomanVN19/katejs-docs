@@ -23,7 +23,7 @@ import { App } from 'kate-client';
 import { Layout, components } from 'kate-form-material-kit-react';
 
 import { makeItemForm, makeListForm } from '../client';
-import Menu, { setMenu } from './Menu';
+import Menu, { setMenu, setTopElements } from './Menu';
 import Alerts, { showAlert } from './Alerts';
 
 const ProxyP = ProxyPolyfill();
@@ -72,18 +72,32 @@ export default class PlatformApp extends App {
         alerts: 'A',
       },
     };
+    this.forms = { M: Menu, A: Alerts };
 
     this.entityMethods = {}; // for Proxy polyfill
   }
-  setMenu(menu) {
-    if (this[setMenu]) {
-      this[setMenu](menu);
-    } else { // to process setMenu from constructor
-      setTimeout(() => {
-        if (this[setMenu]) {
-          this[setMenu](menu);
-        }
-      }, 0);
+  setMenu(menu, topElements) {
+    if (menu) {
+      if (this[setMenu]) {
+        this[setMenu](menu);
+      } else { // to process setMenu from constructor
+        setTimeout(() => {
+          if (this[setMenu]) {
+            this[setMenu](menu);
+          }
+        }, 0);
+      }
+    }
+    if (topElements) {
+      if (this[setTopElements]) {
+        this[setTopElements](topElements);
+      } else {
+        setTimeout(() => {
+          if (this[setTopElements]) {
+            this[setTopElements](topElements)
+          }
+        });
+      }
     }
   }
   showAlert(params) {
@@ -93,7 +107,6 @@ export default class PlatformApp extends App {
   }
   init({ structures, addToMenu }) {
     this.menu = this.menu || [];
-    this.forms = this.forms || { M: Menu, A: Alerts };
     makeFormsFromStructure({
       structures,
       menu: this.menu,

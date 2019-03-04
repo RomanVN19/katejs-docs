@@ -18,7 +18,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 export const model = Symbol('model');
 export const modelGetOptions = Symbol('modelGetOptions');
 export const modelUpdateFields = Symbol('modelUpdateFields');
@@ -29,11 +28,20 @@ export const capitalize = string => `${string.charAt(0).toUpperCase()}${string.s
 const noItemErr = { message: 'Can\'t find entity item', status: 404 };
 
 const replaceOps = (obj, S) => {
-  const result = {};
+  if (!obj) return obj;
+  let result = Array.isArray(obj) ? [] : {};
   Object.keys(obj).forEach((key) => {
+    if (key === '$func') {
+      result = S.fn(obj[key].fn, S.col(obj[key].col));
+      return;
+    }
+    if (key === '$col') {
+      result = S.col(obj[key]);
+      return;
+    }
     let newKey = key;
     if (key[0] === '$') {
-      newKey = S.Op[key.substr(1)];
+      newKey = S.Op[key.substr(1)] || key;
     }
     if (typeof obj[key] === 'object' && obj[key]) {
       result[newKey] = replaceOps(obj[key], S);
@@ -60,6 +68,7 @@ export default class Entity {
   }
   async put({ data, ctx, transaction: t }) {
     let transaction;
+    if (!data.body) return { error: { message: 'No body!', status: 400 } };
     try {
       transaction = t || await this[model].db.sequelize.transaction();
       let item;
@@ -76,16 +85,19 @@ export default class Entity {
         item = await this[model].create(data.body, { transaction });
       }
 
-      if (this.tables) {
-        await Promise.all(this.tables.map(async (table) => {
-          if (data.uuid) {
-            await table[model].destroy({
-              where: { [`${this[model].Name}Uuid`]: item.uuid },
-              transaction,
-            });
+      if (this[tables]) {
+        await Promise.all(Object.keys(this[tables]).map(async (tableName) => {
+          const table = this[tables][tableName];
+          if (data.body[tableName]) { // replace table only if it specified
+            if (data.uuid) {
+              await table[model].destroy({
+                where: { [`${this[model].Name}Uuid`]: item.uuid },
+                transaction,
+              });
+            }
+            const rows = await table[model].bulkCreate(data.body[tableName] || [], { transaction });
+            await item[`set${capitalize(tableName)}`](rows, { transaction });
           }
-          const rows = await table[model].bulkCreate(data.body[table.name] || [], { transaction });
-          await item[`set${capitalize(table.name)}`](rows, { transaction });
         }));
       }
       if (!t) {
@@ -94,7 +106,7 @@ export default class Entity {
       return { response: item.toJSON() };
     } catch (error) {
       this.logger.error(error);
-      if (transaction) {
+      if (transaction && !t) {
         await transaction.rollback();
       }
       return { error };
@@ -125,12 +137,20 @@ export default class Entity {
     if (this.app.paginationLimit) {
       const { page = 1 } = data || {};
       data.offset = (page - 1) * this.app.paginationLimit;
-      data.limit = this.app.paginationLimit;
+      data.limit = data.limit === -1 ? undefined : (data.limit || this.app.paginationLimit);
     }
-    if (data && data.where) {
+    if (data && (data.where || data.attributes || data.group || data.order)) {
       data.where = replaceOps(data.where, this[model].db.Sequelize);
+      data.attributes = replaceOps(data.attributes, this[model].db.Sequelize);
+      data.group = replaceOps(data.group, this[model].db.Sequelize);
+      data.order = replaceOps(data.order, this[model].db.Sequelize);
     }
-    const result = await this[model].findAll({ ...this[modelGetOptions], ...data, transaction });
-    return { response: result.map(item => item.toJSON()) };
+    const result = await this[model].findAll({
+      ...this[modelGetOptions],
+      order: [this.structure.fields[0].name], // default order
+      ...data,
+      transaction,
+    });
+    return { response: data.raw ? result : result.map(item => item.toJSON()) };
   }
 }

@@ -9,7 +9,7 @@ const pageChange = Symbol('loadPage');
 const makeListForm = ({ structure, name, addActions = true, addElements = true }) =>
   class ListForm extends Form {
     static title = makeTitlePlural(name)
-    static path = `/${name}`;
+    static structure = structure;
     static entity = name;
 
     constructor(args) {
@@ -33,11 +33,13 @@ const makeListForm = ({ structure, name, addActions = true, addElements = true }
             id: 'list',
             type: Elements.TABLE,
             rowClick: this[open],
-            columns: structure.fields.filter(item => !item.skipForList).map(item => ({
-              title: makeTitle(item.name),
-              dataPath: item.name,
-              format: value => (typeof value === 'object' && value ? value.title : (value || '')),
-            })),
+            columns: structure.fields ?
+              structure.fields.filter(item => !item.skipForList).map(item => ({
+                title: makeTitle(item.name),
+                dataPath: item.name,
+                format: value => (typeof value === 'object' && value ? value.title : (value || '')),
+              }))
+              : [],
             //  [
             //   { title: 'Title', dataPath: 'title' },
             // ],
@@ -48,13 +50,15 @@ const makeListForm = ({ structure, name, addActions = true, addElements = true }
             type: Elements.PAGINATION,
             hidden: true,
             pageChange: this[pageChange],
+            max: 0,
           },
         ];
       }
       setTimeout(() => this.load(), 0); // to process filter from childs
     }
-    async load({ page = 1 } = {}) {
-      const result = await this.app[name].query({ where: this.filters, order: this.order, page });
+    async load({ page = 1, limit } = {}) {
+      const result = await this.app[name]
+        .query({ where: this.filters, order: this.order, page, limit });
       this.content.list.value = result.response;
       if (this.app.paginationLimit && result.response) {
         this.content.pagination.page = page;
@@ -62,13 +66,16 @@ const makeListForm = ({ structure, name, addActions = true, addElements = true }
           if (this.content.pagination.hidden) {
             this.content.pagination.hidden = false;
           }
+          this.content.pagination.max = 0;
         } else {
           this.content.pagination.max = page;
         }
       }
       if (result.error) {
         this.app.showAlert({ type: 'warning', title: result.error.message });
+        return null;
       }
+      return result.response;
     }
     [pageChange] = (page) => {
       this.load({ page });

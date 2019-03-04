@@ -105,12 +105,14 @@ nav_order: 9
       title: 'option 2'
     },
   ],
+  noClear: false | true,
   getOptions: async (queryText) => ([{}, {}]),
   onChange: (value, allProps) => (),
 },
 ````
 Поле выбора значений, заданных в поле `options`. Каждое значение должно быть объектом с полем `title`, 
-которое используется для отобажения опции. При выборе в value устанавливается сам объект опции.
+которое используется для отобажения опции. При выборе в `value` устанавливается сам объект опции.
+- `noClear` - скрывает кнопку очистки поля
 
 При указании асинхронного метода getOptions список опций для выбора формируется из возвращаемого массива.
 
@@ -154,13 +156,17 @@ nav_order: 9
 ````
 {
   type: Elements.TABLE_EDITABLE,
+  hideRowActions: false || true,
   columns: [
     {
       title: 'column title',
       dataPath: 'title',
+      id: 'input',
       type: Elements.INPUT,
       width: 100,
       onChange: row => (),
+      onClick: row => (),
+      getElement: value => {},
     }
   ],
   value: [
@@ -169,16 +175,36 @@ nav_order: 9
   ],
 }
 ````
-Отображает таблицу с возможностью редактирования значений в ячейках. Тип элемента и его опции
+Отображает таблицу с возможностью редактирования значений в ячейках. 
+
+- `hideRowActions` - скрыть кнопки удаления и перемещения строк
+
+Тип элемента и его опции
 указывается дополнительно в массиве колонок.
 
-После создания и отображения таблицы можно добавить колонки воспользовавшись методом `addRow`.
+- `width` - явным образом указанная ширина колонки
+
+После создания и отображения таблицы можно добавить строку воспользовавшись методом `addRow`.
 ````
 this.content.tableId.addRow({ title: 'row3' });
 ````
 События `onChange` в создаваемых элементах перехватываются таблицей и имеют синтаксис
-`cellChange(rowContent, colIndex)` для возможности установки значений в различные колонки строки
+`cellChange(rowContent, colIndex)` для возможности установки значений в различные колонки строки. 
+Поле `rowContent` аналогично полю `content` у формы - для установки данных в ячейки
+у колонок должно быть задано поле `id`.
+События `onClick` в создаваемых элементах перехватываются таблицей и имеют синтаксис
+`cellClick(rowContent, rowData)`.
 ````
+...
+{
+  ...
+  columns: [
+    { id: 'amount', ...}
+    { id: 'price', onChange: this.priceChange, ...}
+    { id: 'summ', ...}
+  ]
+}
+...
   priceChange(row) {
     row.summ.value = row.amount.value * row.price.value;
   }
@@ -188,6 +214,24 @@ this.content.tableId.addRow({ title: 'row3' });
 ...
     const row = this.content.tableId.getRow(0);
     row.summ.value = row.amount.value * row.price.value;
+...
+````
+Для динамического формирования элемента ячейки используется поле `getElement` которое
+получает на входе значение по `dataPath` и должно вернуть элемент.
+````
+...
+          {
+            title: 'Accept',
+            dataPath: '',
+            getElement: row => (row.inactive ? {
+              type: Elements.BUTTON,
+              title: 'Accept user',
+              onClick: this.accept,
+            } : {
+              type: Elements.LABEL,
+              title: '✔',
+            }),
+          },
 ...
 ````
 

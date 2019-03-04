@@ -30,6 +30,7 @@ export const SequelizeFields = {
   [Fields.BOOLEAN]: Sequelize.BOOLEAN,
   [Fields.TEXT]: Sequelize.TEXT,
   [Fields.DATE]: Sequelize.DATE,
+  [Fields.DATEONLY]: Sequelize.DATEONLY,
 };
 
 const getModelParams = (entity, structure) => {
@@ -63,6 +64,8 @@ const getModelParams = (entity, structure) => {
           // if (value && !this.getDataValue(field.name)) {
           if (value) {
             this.setDataValue(`${field.name}Uuid`, value.uuid);
+          } else {
+            this.setDataValue(`${field.name}Uuid`, null);
           }
         };
         break;
@@ -98,7 +101,7 @@ const makeAssociations = (entities, logger) => {
       entity.structure.fields.forEach((field) => {
         if (field.type === Fields.REFERENCE) {
           entity[model].belongsTo(entities[field.entity][model], { as: field.name });
-          entity[modelGetOptions].include.push({ model: entities[field.entity][model], as: field.name, attributes: ['title', 'uuid'] });
+          entity[modelGetOptions].include.push({ model: entities[field.entity][model], as: field.name, attributes: field.attributes || ['title', 'uuid'] });
           if (logger) logger.info('Defined association:', entity[model].Name, field.name, ' - ', entities[field.entity][model].Name);
         }
       });
@@ -109,7 +112,7 @@ const makeAssociations = (entities, logger) => {
         tableStructure.fields.forEach((field) => {
           if (field.type === Fields.REFERENCE) {
             table[model].belongsTo(entities[field.entity][model], { as: field.name });
-            table[modelGetOptions].include.push({ model: entities[field.entity][model], as: field.name, attributes: ['title', 'uuid'] });
+            table[modelGetOptions].include.push({ model: entities[field.entity][model], as: field.name, attributes: field.attributes || ['title', 'uuid'] });
             if (logger) logger.info('Defined association:', table[model].Name, field.name, ' - ', entities[field.entity][model].Name);
           }
         });
@@ -133,6 +136,7 @@ export default class Database {
       ...databaseParams,
       dialect: 'mysql',
       operatorsAliases: false,
+      dialectOptions: { decimalNumbers: true },
     });
     this.Sequelize = Sequelize;
     this.entities = entities;
@@ -143,7 +147,6 @@ export default class Database {
       await this.sequelize.authenticate();
       this.logger.info('...connected to database');
     } catch (e) {
-
       this.logger.error('...can not connect to database!', e);
       process.exit(e);
     }
@@ -159,11 +162,12 @@ export default class Database {
         this.logger.info('Defined model:', entityName.toLowerCase());
       }
       if (entity.structure && entity.structure.tables) {
-        entity[tables] ={};
+        entity[tables] = {};
         entity.structure.tables.forEach((tableStructure) => {
           const table = {};
           entity[tables][tableStructure.name] = table;
-          const { params: tableParams, options: tableOptions } = getModelParams(table, tableStructure);
+          const { params: tableParams, options: tableOptions }
+            = getModelParams(table, tableStructure);
           // eslint-disable-next-line no-param-reassign
           table[model] = this.sequelize.define(`${entityName.toLowerCase()}${capitalize(tableStructure.name)}`, tableParams, tableOptions);
           table[model].Name = `${entityName.toLowerCase()}${capitalize(tableStructure.name)}`;

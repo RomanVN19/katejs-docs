@@ -37,9 +37,11 @@ const elementsByFields = {
   [Fields.STRING]: Elements.INPUT,
   [Fields.REFERENCE]: Elements.SELECT,
   [Fields.DECIMAL]: Elements.INPUT,
+  [Fields.INTEGER]: Elements.INPUT,
   [Fields.BOOLEAN]: Elements.CHECKBOX,
   [Fields.TEXT]: Elements.INPUT,
   [Fields.DATE]: Elements.DATE,
+  [Fields.DATEONLY]: Elements.DATE,
 };
 
 export const getElement = (field, form) => {
@@ -50,7 +52,11 @@ export const getElement = (field, form) => {
   };
   if (field.type === Fields.REFERENCE) {
     const getFuncName = `getOptions${capitalize(field.entity)}`;
-    if (!form[getFuncName]) {
+    if (!form) {
+      // eslint-disable-next-line no-console
+      console.error('getElement(field, form) - missing form for field', field);
+    }
+    if (form && !form[getFuncName]) {
       // eslint-disable-next-line no-param-reassign
       form[getFuncName] = async (query) => {
         const where = query && { title: { $like: `%${query}%` } };
@@ -58,11 +64,19 @@ export const getElement = (field, form) => {
         return response;
       };
     }
-    element.getOptions = form[getFuncName];
+    element.getOptions = form && form[getFuncName];
   }
   if (field.type === Fields.DECIMAL) {
     const intLength = (field.length || 15) - (field.precision || 2);
     const re = new RegExp(`\\d{0,${intLength}}(\\.\\d{0,${field.precision || 2}})?`);
+    element.format = (val) => {
+      const res = re.exec(val);
+      return res ? res[0] : 0;
+    };
+  }
+  if (field.type === Fields.INTEGER) {
+    const intLength = (field.length || 15);
+    const re = new RegExp(`\\d{0,${intLength}}`);
     element.format = (val) => {
       const res = re.exec(val);
       return res ? res[0] : 0;
@@ -74,6 +88,11 @@ export const getElement = (field, form) => {
   if (field.type === Fields.DATE) {
     element.dateFormat = 'DD.MM.YYYY';
     element.timeFormat = 'HH:mm';
+    element.closeOnSelect = true;
+  }
+  if (field.type === Fields.DATEONLY) {
+    element.dateFormat = 'DD.MM.YYYY';
+    element.timeFormat = false;
     element.closeOnSelect = true;
   }
   return element;
@@ -102,6 +121,7 @@ export const getTableElement = (table, form) => {
     id: `${table.name}Card`,
     type: Elements.CARD,
     title: makeTitle(table.name),
+    titleTag: 'h3',
     elements: [
       {
         type: Elements.CARD_ACTIONS,

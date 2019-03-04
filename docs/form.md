@@ -64,9 +64,10 @@ class Auth extends Form {
     this.content.password.error = false;
   }
   login = async () => {
+    const { username, password} = this.getValues();
     const result = await this.app.User.auth({
-      username: this.content.username.value,
-      password: this.content.password.value,
+      username,
+      password,
     });
     if (result.error) {
       this.content.username.error = true;
@@ -132,7 +133,7 @@ const click = Symbol('click');
 this.app.open('ItemForm');
 ````
 
-## `content`
+### `content`
 При инициализации формы создается служебное поле `content` которое можно использовать
 в событиях элементов формы для изменения их поведения. С помощью этого поля
 можно в простом виде прочитать или задать любое поле любого элемента формы по его `id`.
@@ -159,6 +160,9 @@ this.app.open('ItemForm');
     }
   }
 ````
+### `getValues`
+Метод формы `getValues` обходит все элемиенты формы имеющие атрибуты `id`, `value` и возвращает объект, ключами которого являются атрибуты `id`, а значениями - `value`.
+
 
 ## Работа с API
 

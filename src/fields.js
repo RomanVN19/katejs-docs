@@ -26,6 +26,7 @@ const Fields = {
   BOOLEAN: Symbol('boolean'),
   TEXT: Symbol('TEXT'),
   DATE: Symbol('DATE'),
+  DATEONLY: Symbol('DATEONLY'),
 };
 
 export default Fields;

@@ -23,6 +23,7 @@ import KateServer from './KateServer';
 
 export const makeEntityFromStructure = structure =>
   class EntityFromStructure extends Entity {
+    static structure = structure;
     constructor(params) {
       super(params);
       this.structure = structure;
@@ -44,16 +45,3 @@ export const trivialLogger = {
 };
 
 export default KateServer;
-
-// export default class KateJSServer {
-//   constructor({ AppServer, logger, http, database }) {
-//     this.logger = logger || trivialLogger;
-//     this.server = new KateServer({ App: AppServer, logger: this.logger });
-//   }
-//   syncDatabase() {
-//     this.server.syncDatabase();
-//   }
-//   start() {
-//     this.server.run();
-//   }
-// }

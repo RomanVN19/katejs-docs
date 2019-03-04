@@ -116,6 +116,22 @@ afterInit() {
       this.app.open(`DocumentItem`, { id: row.uuid });
     }
 ````
+## `showAlert`
+Метод для отображает уведомлений.
+
+`showAlert({ type, title, description, timeout })`
+- `type` - Тип уведомления. Влияет на цвет фона и иконку. 
+Может быть одним из: `success || info || warning`.
+- `title` - текст заголовка уведомления
+- `description` - текст уведомления
+- `timeout` - время отображения уведомления в секундах. По умолчанию - 2.
+````
+this.showAlert({ type: 'info', title: 'Loaded!' });
+````
+Из класса формы
+````
+this.app.showAlert({ type: 'success', title: 'Saved!', timeout: 5 });
+````
 
 ## Поддержка IE и браузеров без объекта Proxy
 Для возможности вызова методов api как `app.Entity.method(params)` необходимо

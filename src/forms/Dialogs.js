@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { Elements } from 'katejs/lib/client';
+import { Elements } from '../client';
 
 const ConfirmDialog = ({ form, id }) => {
   let resolveFunc;
