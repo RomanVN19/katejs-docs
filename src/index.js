@@ -62,6 +62,10 @@ export default class KateJS {
           test: /\.js$/,
           exclude: /(node_modules|bower_components)/,
           loader: 'babel-loader',
+          options: {
+            cacheDirectory: true,
+            cacheCompression: false,
+          },
         },
         {
           test: /\.css$/,
@@ -69,6 +73,14 @@ export default class KateJS {
             fallback: 'style-loader',
             use: 'css-loader',
           }),
+        },
+        {
+          test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
+          loader: 'url-loader',
+          options: {
+            limit: 10000,
+            name: 'static/media/[name].[hash:8].[ext]',
+          },
         },
         {
           test: /\.svg$/,
