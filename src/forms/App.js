@@ -73,8 +73,13 @@ export default class PlatformApp extends App {
       },
     };
     this.forms = { M: Menu, A: Alerts };
+    this.drawerOpen = true;
 
     this.entityMethods = {}; // for Proxy polyfill
+  }
+  setDrawer(drawerOpen) {
+    this.drawerOpen = drawerOpen;
+    this.layoutComponent.forceUpdate();
   }
   setMenu(menu, topElements) {
     if (menu) {
@@ -94,7 +99,7 @@ export default class PlatformApp extends App {
       } else {
         setTimeout(() => {
           if (this[setTopElements]) {
-            this[setTopElements](topElements)
+            this[setTopElements](topElements);
           }
         });
       }

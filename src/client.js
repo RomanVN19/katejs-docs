@@ -44,6 +44,17 @@ const elementsByFields = {
   [Fields.DATEONLY]: Elements.DATE,
 };
 
+export const decimalFormat = (length, precision) => {
+  const intLength = (length || 15) - (precision || 2);
+  const re = precision === 0 ? new RegExp(`\\d{0,${length || 15}}`)
+    : new RegExp(`\\d{0,${intLength}}(\\.\\d{0,${precision || 2}})?`);
+  return (val) => {
+    const res = re.exec(val);
+    // numbers formated as string to allow enter partial decimal (like "10." -> "10.5")
+    return res ? res[0] : 0;
+  };
+};
+
 export const getElement = (field, form) => {
   const element = {
     id: field.name,
@@ -67,23 +78,13 @@ export const getElement = (field, form) => {
     element.getOptions = form && form[getFuncName];
   }
   if (field.type === Fields.DECIMAL) {
-    const intLength = (field.length || 15) - (field.precision || 2);
-    const re = new RegExp(`\\d{0,${intLength}}(\\.\\d{0,${field.precision || 2}})?`);
-    element.format = (val) => {
-      const res = re.exec(val);
-      return res ? res[0] : 0;
-    };
+    element.format = decimalFormat(field.length, field.precision);
   }
   if (field.type === Fields.INTEGER) {
-    const intLength = (field.length || 15);
-    const re = new RegExp(`\\d{0,${intLength}}`);
-    element.format = (val) => {
-      const res = re.exec(val);
-      return res ? res[0] : 0;
-    };
+    element.format = decimalFormat(field.length, 0);
   }
   if (field.type === Fields.TEXT) {
-    element.rows = 5;
+    element.rows = field.rows || 5;
   }
   if (field.type === Fields.DATE) {
     element.dateFormat = 'DD.MM.YYYY';
@@ -102,16 +103,22 @@ export const getTableElement = (table, form) => {
   const tableElement = {
     type: Elements.TABLE_EDITABLE,
     id: table.name,
-    columns: [],
+    columns: [
+      {
+        dataPath: 'rowNumber',
+        title: '№',
+      },
+    ],
   };
   table.fields.filter(field => !field.skipForForm)
     .forEach((field) => {
       const element = getElement(field, form);
       element.dataPath = element.id;
-      delete element.id;
+      // columnt id doesnot affect to content, because it in 'columns' not in 'elements'
       tableElement.columns.push(element);
     });
   const addButton = {
+    id: `${table.name}AddButton`,
     type: Elements.BUTTON,
     title: 'Add',
     onClick: () => form.content[table.name].addRow({}),
@@ -124,6 +131,7 @@ export const getTableElement = (table, form) => {
     titleTag: 'h3',
     elements: [
       {
+        id: `${table.name}CardActions`,
         type: Elements.CARD_ACTIONS,
         elements: [
           addButton,

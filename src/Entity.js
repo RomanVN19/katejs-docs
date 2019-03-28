@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 */
 export const model = Symbol('model');
+export const literal = Symbol('literal');
 export const modelGetOptions = Symbol('modelGetOptions');
 export const modelUpdateFields = Symbol('modelUpdateFields');
 export const tables = Symbol('tables');
@@ -27,10 +28,16 @@ export const capitalize = string => `${string.charAt(0).toUpperCase()}${string.s
 
 const noItemErr = { message: 'Can\'t find entity item', status: 404 };
 
-const replaceOps = (obj, S) => {
+const replaceOps = (obj, S, opt) => {
   if (!obj) return obj;
   let result = Array.isArray(obj) ? [] : {};
+  if (obj[literal]) {
+    result = S.literal(obj[literal]);
+  }
   Object.keys(obj).forEach((key) => {
+    if (key.indexOf('.') > -1) {
+      opt.subQuery = false;
+    }
     if (key === '$func') {
       result = S.fn(obj[key].fn, S.col(obj[key].col));
       return;
@@ -44,7 +51,7 @@ const replaceOps = (obj, S) => {
       newKey = S.Op[key.substr(1)] || key;
     }
     if (typeof obj[key] === 'object' && obj[key]) {
-      result[newKey] = replaceOps(obj[key], S);
+      result[newKey] = replaceOps(obj[key], S, opt);
     } else {
       result[newKey] = obj[key];
     }
@@ -56,11 +63,20 @@ export default class Entity {
   constructor(params) {
     Object.assign(this, params);
   }
-  transaction() {
-    return this[model].db.sequelize.transaction();
+  transaction(options) {
+    return this[model].db.sequelize.transaction(options);
   }
-  async get({ data, transaction }) {
-    const item = await this[model].findByPk(data.uuid, { ...this[modelGetOptions], transaction });
+  async get({ data, transaction, lock }) {
+    const order = [];
+    if (this[tables]) {
+      Object.keys(this[tables]).forEach(tableName =>
+        order.push([{ model: this[tables][tableName][model], as: tableName }, 'rowNumber']));
+    }
+
+    const item = await this[model].findByPk(
+      data.uuid,
+      { ...this[modelGetOptions], order, transaction, lock },
+    );
     if (!item) {
       return { error: noItemErr };
     }
@@ -72,13 +88,19 @@ export default class Entity {
     try {
       transaction = t || await this[model].db.sequelize.transaction();
       let item;
+      let savedEntity;
       if (data.uuid) {
         item = await this[model].findByPk(data.uuid, { ...this[modelGetOptions], transaction });
         if (!item) {
           return { error: noItemErr };
         }
+        savedEntity = item.toJSON();
         if (ctx) { // can be called from another entity without ctx
-          ctx.state.savedEntity = item.toJSON();
+          ctx.state.savedEntity = savedEntity;
+        }
+        if (this.beforePut) {
+          // data.body can be changed
+          await this.beforePut({ savedEntity, body: data.body, transaction, ctx });
         }
         await item.update(data.body, { fields: this[modelUpdateFields], transaction });
       } else {
@@ -95,10 +117,19 @@ export default class Entity {
                 transaction,
               });
             }
-            const rows = await table[model].bulkCreate(data.body[tableName] || [], { transaction });
+            const tableData = data.body[tableName]
+              .map((row, index) => ({ ...row, rowNumber: index + 1 }));
+            const rows = await table[model].bulkCreate(tableData, { transaction });
             await item[`set${capitalize(tableName)}`](rows, { transaction });
           }
         }));
+      }
+      if (this.afterPut) {
+        await this.afterPut({
+          entity: Object.assign({ uuid: item.uuid }, savedEntity, data.body),
+          transaction,
+          ctx,
+        });
       }
       if (!t) {
         await transaction.commit();
@@ -133,23 +164,39 @@ export default class Entity {
       return { error };
     }
   }
-  async query({ data = {}, transaction } = { data: {} }) {
+  async query({ data = {}, transaction, lock } = { data: {} }) {
+    const queryOptions = {};
+    if (data && (data.where || data.attributes || data.group || data.order)) {
+      data.where = replaceOps(data.where, this[model].db.Sequelize, queryOptions);
+      data.attributes = replaceOps(data.attributes, this[model].db.Sequelize, queryOptions);
+      data.group = replaceOps(data.group, this[model].db.Sequelize, queryOptions);
+      data.order = replaceOps(data.order, this[model].db.Sequelize, queryOptions);
+      if (data.subQuery === undefined) {
+        data.subQuery = queryOptions.subQuery;
+      }
+    }
     if (this.app.paginationLimit) {
       const { page = 1 } = data || {};
-      data.offset = (page - 1) * this.app.paginationLimit;
-      data.limit = data.limit === -1 ? undefined : (data.limit || this.app.paginationLimit);
+      data.offset = (page - 1) * (data.limit || this.app.paginationLimit);
+      if (queryOptions.subQuery === false) {
+        // when condition to joined tables present limit works weird
+        data.limit = data.limit === -1 ? undefined : data.limit;
+      } else {
+        data.limit = data.limit === -1 ? undefined : (data.limit || this.app.paginationLimit);
+      }
     }
-    if (data && (data.where || data.attributes || data.group || data.order)) {
-      data.where = replaceOps(data.where, this[model].db.Sequelize);
-      data.attributes = replaceOps(data.attributes, this[model].db.Sequelize);
-      data.group = replaceOps(data.group, this[model].db.Sequelize);
-      data.order = replaceOps(data.order, this[model].db.Sequelize);
+    const order = data.order || [this.structure.fields[0].name];
+    if (this[tables]) {
+      Object.keys(this[tables]).forEach(tableName =>
+        order.push([{ model: this[tables][tableName][model], as: tableName }, 'rowNumber']));
     }
+    const options = data.noOptions ? {} : { ...this[modelGetOptions], order };
+    if (!data.order) delete data.order; // to avoid replace in spread below
     const result = await this[model].findAll({
-      ...this[modelGetOptions],
-      order: [this.structure.fields[0].name], // default order
+      ...options,
       ...data,
       transaction,
+      lock,
     });
     return { response: data.raw ? result : result.map(item => item.toJSON()) };
   }

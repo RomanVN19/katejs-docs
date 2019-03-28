@@ -23,6 +23,7 @@ export default class Menu extends Form {
   }
   switchDrawer = () => {
     this.content.menu.drawerOpen = !this.content.menu.drawerOpen;
+    this.app.setDrawer(this.content.menu.drawerOpen);
   }
   onClick = (item) => {
     if (item.onClick) {

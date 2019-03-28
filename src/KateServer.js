@@ -27,23 +27,41 @@ const trivialLogger = {
   debug: (...args) => console.log(...args),
   error: (...args) => console.error(...args),
 };
+const terms = Symbol('terms');
 
 class AppServer {
-  constructor({ logger, env }) {
+  constructor({ logger, env, translations }) {
     this.logger = logger;
     this.env = env;
     this.entities = {};
     this.httpMidlewares = [];
     this.paginationLimit = 20;
+    this[terms] = translations && translations[translations.languages[0]];
+  }
+  t = (strings, ...keys) => {
+    if (!strings) return '';
+    if (typeof strings === 'string') {
+      if (!this[terms]) return strings;
+      return this[terms][strings] || strings;
+    }
+    // using as tag
+    const result = [];
+    keys.forEach((key, index) => {
+      result.push((this[terms] && this[terms][strings[index]]) || strings[index]);
+      result.push(key);
+    });
+    result.push((this[terms] && this[terms][strings[strings.length - 1]]) 
+      || strings[strings.length - 1]);
+    return result.join('');
   }
 }
 
 export default class KateServer {
-  constructor({ AppServer: App, logger, database: databaseParams, http: httpParams, env }) {
+  constructor({ AppServer: App, logger, database: databaseParams, http: httpParams, env, translations }) {
     this.logger = logger || trivialLogger;
 
     this.logger.info('Creating KateServer...');
-    this.app = new (App(AppServer))({ logger: this.logger, env });
+    this.app = new (App(AppServer))({ logger: this.logger, env, translations });
     const { entities: entitiesClasses } = this.app;
     const entities = {};
     if (this.app.beforeInit) this.app.beforeInit();

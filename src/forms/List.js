@@ -1,10 +1,19 @@
 import { Elements } from 'kate-form-material-kit-react';
 import Form from './Form';
 import { makeTitle, makeTitlePlural } from '../client';
+import Fields from '../fields';
 
 const add = Symbol('add');
 const open = Symbol('open');
 const pageChange = Symbol('loadPage');
+
+const notNullString = val => ((val === null || val === undefined) ? '' : `${val}`);
+
+const fieldForList = (field) => {
+  if (field.skipForList) return false;
+  if (field.type === Fields.JSON) return false;
+  return true;
+};
 
 const makeListForm = ({ structure, name, addActions = true, addElements = true }) =>
   class ListForm extends Form {
@@ -34,15 +43,12 @@ const makeListForm = ({ structure, name, addActions = true, addElements = true }
             type: Elements.TABLE,
             rowClick: this[open],
             columns: structure.fields ?
-              structure.fields.filter(item => !item.skipForList).map(item => ({
+              structure.fields.filter(item => fieldForList(item)).map(item => ({
                 title: makeTitle(item.name),
                 dataPath: item.name,
-                format: value => (typeof value === 'object' && value ? value.title : (value || '')),
+                format: value => (typeof value === 'object' && value ? value.title : notNullString(value)),
               }))
               : [],
-            //  [
-            //   { title: 'Title', dataPath: 'title' },
-            // ],
             value: [],
           },
           {

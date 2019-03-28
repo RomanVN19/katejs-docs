@@ -139,17 +139,12 @@ export default class Template extends Entity {
 Выборка записей включает связанные таблицы, поэтому есть возможность
 выбирать с уловиями на вложенные поля.
 
-Выборка по условию на элемент в таблице сущности:
-````
-const where = { '$roles.role.uuid$': role.uuid };
-````
-
 Упорядочить по атрибуту ссылочного поля
 ````
 const order = [['district', 'title']];
 ````
 
-Для агрегирования данных также можно использовать метод query
+Для агрегирования данных можно использовать метод query
 используя вспомогательные ключи `$func` и `$col` как способ
 указания `Sequelize.fn` и `Sequelize.col`.
 
@@ -164,6 +159,48 @@ const order = [['district', 'title']];
         order: [{ $col: 'products->product.title' }],
 ````
 
+Для ручного указания SQL функции для атрибута (при комбинировании двух функций, например)
+можно использовать ключ `literal` как способ указания `Sequelize.literal`.
+
+Данная фукнциональность доступна только со стороны сервера для исключения
+SQL инъекций.
+````
+import { literal } from 'katejs/lib/Entity';
+
+...
+    attributes: [
+      [{ [literal]: 'COUNT(DISTINCT(news.uuid))' }, 'count'],
+    ],
+````
+
+При выборке вложенных полей необходимо указать путь через `.` внутри `$$`.
+
+````
+const where = { '$role.title$': { $like: '%Admin%' } };
+````
+
+Выборка по условию на элемент в табличной части сущности:
+````
+// select users by specific role
+const where = { '$roles.role.uuid$': role.uuid };
+````
+Важно. При использовании условия на таблицы сущности или атрибуты ссылочных полей 
+фреймворк не будет использовать лимит для пагинации. 
+Такой лимит в этом случае не имеет смысла, так как для отработки условия
+на поля табличной части происходит ее соединение с основной таблицей
+и на каждую сущность получается несколько строк 
+(столько сколько записей в табличной части) и параметр `limit` влияет
+на общее кол-во строк в выборке, а не на количество сущностей.
+
+При необходимости пагинации с условием на атрибут табличной части
+можно указать это условие через вложенный запрос используя `literal`
+````
+  // select users by specific role
+  const where = {
+    [literal]: `\`uuid\` IN (SELECT userUuid FROM userroles WHERE roleUuid = '${role.uuid}')`,
+  };
+````
+
 ### Транзакции
 
 В системе есть возможность использовать транзакции. Для этого необходимо создать транзакцию,
@@ -173,11 +210,14 @@ const order = [['district', 'title']];
   async someAction({ ctx, data: { uuid } }) {
     const transaction = await this.transaction();
     try {
-      const { response: item } = await this.get({ data: { uuid }, transaction });
-      
-      // ... do some stuff
+      const { response: item } =
+        await this.get({ data: { uuid }, transaction, lock: transaction.LOCK.UPDATE });
 
-      result = await this.put({ data: { uuid, body: item }, transaction });
+      item.readedBy.push({
+        user: ctx.state.user,
+      });
+
+      const result = await this.put({ data: { uuid, body: item }, transaction });
       transaction.commit();
       return result;
     } catch (error) {

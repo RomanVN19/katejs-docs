@@ -27,6 +27,7 @@ const Fields = {
   TEXT: Symbol('TEXT'),
   DATE: Symbol('DATE'),
   DATEONLY: Symbol('DATEONLY'),
+  JSON: Symbol('JSON'),
 };
 
 export default Fields;

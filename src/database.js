@@ -31,9 +31,10 @@ export const SequelizeFields = {
   [Fields.TEXT]: Sequelize.TEXT,
   [Fields.DATE]: Sequelize.DATE,
   [Fields.DATEONLY]: Sequelize.DATEONLY,
+  [Fields.JSON]: Sequelize.JSON,
 };
 
-const getModelParams = (entity, structure) => {
+const getModelParams = (entity, structure, rowNumber) => {
   const modelParams = {
     uuid: {
       type: Sequelize.UUID,
@@ -41,6 +42,11 @@ const getModelParams = (entity, structure) => {
       defaultValue: Sequelize.UUIDV4,
     },
   };
+  if (rowNumber) {
+    modelParams.rowNumber = {
+      type: Sequelize.INTEGER,
+    };
+  }
   const modelOptions = {
     getterMethods: {
     },
@@ -50,6 +56,9 @@ const getModelParams = (entity, structure) => {
 
   // eslint-disable-next-line no-param-reassign
   entity[modelGetOptions] = { include: [], attributes: ['uuid', 'createdAt', 'updatedAt'] };
+  if (rowNumber) {
+    entity[modelGetOptions].attributes.push('rowNumber');
+  }
   // eslint-disable-next-line no-param-reassign
   entity[modelUpdateFields] = [];
 
@@ -167,7 +176,7 @@ export default class Database {
           const table = {};
           entity[tables][tableStructure.name] = table;
           const { params: tableParams, options: tableOptions }
-            = getModelParams(table, tableStructure);
+            = getModelParams(table, tableStructure, true);
           // eslint-disable-next-line no-param-reassign
           table[model] = this.sequelize.define(`${entityName.toLowerCase()}${capitalize(tableStructure.name)}`, tableParams, tableOptions);
           table[model].Name = `${entityName.toLowerCase()}${capitalize(tableStructure.name)}`;

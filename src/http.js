@@ -67,9 +67,14 @@ export default class Http {
     this.router = new Router();
 
     this.router.post(apiUrl, this.api);
+    this.router.get('/static/*', (ctx) => {
+      // for old bundles files
+      ctx.body = { message: 'Not found' };
+      ctx.status = 404;
+    });
 
-    this.app.use(this.router.routes());
     this.app.use(Static(`${process.cwd()}/build`, { hidden: true }));
+    this.app.use(this.router.routes());
     this.app.use(async (ctx) => {
       await Send(ctx, '/build/index.html', process.cwd());
     });
