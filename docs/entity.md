@@ -95,7 +95,7 @@ export default class Template extends Entity {
 При создании сущности с помощью метода `makeEntitiesFromStructures` или наследованием от `Entity`
 класс получает следующие методы.
 
-`async get({ data: { uuid } })` - получение данных о записи из СУБД
+`async get({ data: { uuid }, transaction, lock })` - получение данных о записи из СУБД
 Параметры:
 - `uuid` - идентификатор записи.
 
@@ -104,7 +104,7 @@ export default class Template extends Entity {
 - `error` - ошибка
 
 
-`async put({ data: { uuid, body } })` - запись данных в СУБД
+`async put({ data: { uuid, body }, transaction })` - запись данных в СУБД
 Параметры:
 - `uuid` - идентификатор записи данные которой надо обновить. При отсутствии будет создана новая запись.
 - `body` - данные записи
@@ -114,7 +114,7 @@ export default class Template extends Entity {
 - `error` - ошибка
 
 
-`async delete({ data: { uuid } })` - удаление записи из СУБД
+`async delete({ data: { uuid }, transaction })` - удаление записи из СУБД
 Параметры:
 - `uuid` - идентификатор записи которую нужно удалить
 
@@ -122,7 +122,7 @@ export default class Template extends Entity {
 - `response` - объект `{ ok: true }`, если удаление прошло успешно
 - `error` - ошибка
 
-`async query({ data: { where, attributes } })` - получение списка записей из СУБД
+`async query({ data: { where, attributes }, transaction, lock })` - получение списка записей из СУБД
 Параметры:
 - `where`, `attribures` - параметры выборки в формате [Sequelize](http://docs.sequelizejs.com/manual/tutorial/querying.html). 
 Операторы записываются в виде строковых ключей в виде `$or`, `$and`, `$gt` и т.п.
@@ -134,6 +134,51 @@ export default class Template extends Entity {
 `async transaction()` - старт транзакции
 Возвращает
 - `transaction` - объект транзации.
+
+### Обработчики класса Entity
+Если класс, наследуемый от `Entity` определит соответствующий метод, 
+то тот будет вызван из основных методов класса `Entity`. 
+Обработчики позволяют реализовать дополнительный
+функционал без переопределения базовых методов.
+- `beforePut({ savedEntity, body, transaction, ctx })` - вызывается в процессе работы
+метода `put` до записи в базу данных. В метод передается сохраненный в базе объект,
+при его наличии, новые данные, транзакция и контекст запроса. Если в методе будет
+вызвано исключение, то запись в базу данный произведена не будет.
+- `afterPut({ entity, transaction, ctx })` - вызывается в процессе работы
+метода `put` после записи в базу данных но до завершения транзакции. В метод
+передается созданный/измененный объект, транзакция и контекст запроса.
+
+### Транзакции
+
+В системе есть возможность использовать транзакции. 
+Для этого необходимо создать транзакцию,
+передать ее во все вызовы методом сущности, зафиксировать или отменить.
+
+Методы `get`, `query` будут использовать транзакцию и блокировку 
+если они переданы как параметр.
+
+Методы `put`, `delete` будут использовать переданную транзакцию или 
+создавать и завершать свою, если транзакция не передана.
+````
+  async someAction({ ctx, data: { uuid } }) {
+    const transaction = await this.transaction();
+    try {
+      const { response: item } =
+        await this.get({ data: { uuid }, transaction, lock: transaction.LOCK.UPDATE });
+
+      item.readedBy.push({
+        user: ctx.state.user,
+      });
+
+      const result = await this.put({ data: { uuid, body: item }, transaction });
+      transaction.commit();
+      return result;
+    } catch (error) {
+      transaction.rollback();
+      return { error };
+    }
+  }
+````
 
 ### Варианты условий в выборке записей Entity.query
 Выборка записей включает связанные таблицы, поэтому есть возможность
@@ -184,6 +229,22 @@ const where = { '$role.title$': { $like: '%Admin%' } };
 // select users by specific role
 const where = { '$roles.role.uuid$': role.uuid };
 ````
+
+При отсутствии необходимости использования в запросе 
+вложенных таблиц (ссылки, таб. части)
+следует передать параметр `noOption = true`
+````
+  const { response, error } = await this.app.User.query({
+      data: {
+        noOptions: true,
+        attributes: [
+          [{ [literal]: 'COUNT(DISTINCT(districtUuid))' }, 'count'],
+        ],
+      },
+    });
+
+````
+
 Важно. При использовании условия на таблицы сущности или атрибуты ссылочных полей 
 фреймворк не будет использовать лимит для пагинации. 
 Такой лимит в этом случае не имеет смысла, так как для отработки условия
@@ -201,28 +262,3 @@ const where = { '$roles.role.uuid$': role.uuid };
   };
 ````
 
-### Транзакции
-
-В системе есть возможность использовать транзакции. Для этого необходимо создать транзакцию,
-передать ее во все вызовы методом сущности, зафиксировать или отменить.
-
-````
-  async someAction({ ctx, data: { uuid } }) {
-    const transaction = await this.transaction();
-    try {
-      const { response: item } =
-        await this.get({ data: { uuid }, transaction, lock: transaction.LOCK.UPDATE });
-
-      item.readedBy.push({
-        user: ctx.state.user,
-      });
-
-      const result = await this.put({ data: { uuid, body: item }, transaction });
-      transaction.commit();
-      return result;
-    } catch (error) {
-      transaction.rollback();
-      return { error };
-    }
-  }
-````
