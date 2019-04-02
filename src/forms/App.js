@@ -23,7 +23,7 @@ import { App } from 'kate-client';
 import { Layout, components } from 'kate-form-material-kit-react';
 
 import { makeItemForm, makeListForm } from '../client';
-import Menu, { setMenu, setTopElements } from './Menu';
+import Menu, { menuForm } from './Menu';
 import Alerts, { showAlert } from './Alerts';
 
 const ProxyP = ProxyPolyfill();
@@ -83,23 +83,23 @@ export default class PlatformApp extends App {
   }
   setMenu(menu, topElements) {
     if (menu) {
-      if (this[setMenu]) {
-        this[setMenu](menu);
+      if (this[menuForm]) {
+        this[menuForm].setMenu(menu);
       } else { // to process setMenu from constructor
         setTimeout(() => {
-          if (this[setMenu]) {
-            this[setMenu](menu);
+          if (this[menuForm]) {
+            this[menuForm].setMenu(menu);
           }
         }, 0);
       }
     }
     if (topElements) {
-      if (this[setTopElements]) {
-        this[setTopElements](topElements);
+      if (this[menuForm]) {
+        this[menuForm].setTopElements(topElements);
       } else {
         setTimeout(() => {
-          if (this[setTopElements]) {
-            this[setTopElements](topElements);
+          if (this[menuForm]) {
+            this[menuForm].setTopElements(topElements);
           }
         });
       }

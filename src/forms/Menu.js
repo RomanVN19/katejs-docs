@@ -1,8 +1,7 @@
 import { Form } from 'kate-client';
 import { Elements } from 'kate-form-material-kit-react';
 
-export const setMenu = Symbol('setMenu');
-export const setTopElements = Symbol('setTopElements');
+export const menuForm = Symbol('menuForm');
 
 export default class Menu extends Form {
   constructor(params) {
@@ -16,10 +15,11 @@ export default class Menu extends Form {
       switchDrawer: this.switchDrawer,
       title: this.app.constructor.title,
       logo: this.app.constructor.logo,
+      brandClick: this.app.brandClick || (() => this.onClick({ form: 'none' })),
       topElements: [],
     }];
-    this.app[setMenu] = this.setMenu;
-    this.app[setTopElements] = this.setTopElements;
+    this.app[menuForm] = this;
+    this.app.drawer = this.content;
   }
   switchDrawer = () => {
     this.content.menu.drawerOpen = !this.content.menu.drawerOpen;
