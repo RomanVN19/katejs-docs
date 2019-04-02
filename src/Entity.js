@@ -104,6 +104,10 @@ export default class Entity {
         }
         await item.update(data.body, { fields: this[modelUpdateFields], transaction });
       } else {
+        if (this.beforePut) {
+          // data.body can be changed
+          await this.beforePut({ savedEntity, body: data.body, transaction, ctx });
+        }
         item = await this[model].create(data.body, { transaction });
       }
 
