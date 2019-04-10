@@ -132,6 +132,56 @@ this.showAlert({ type: 'info', title: 'Loaded!' });
 ````
 this.app.showAlert({ type: 'success', title: 'Saved!', timeout: 5 });
 ````
+## Использование собственных React компонентов
+
+Элементы формы подключаются по идентификатору (строковому, `Symbol`) из поля `type`,
+передавая все поля элемента как `props`.
+При необходимости можно дополнить их собственными.
+
+`AppClient.js`
+````
+import BigCalendar from 'react-big-calendar';
+
+const localizer = BigCalendar.momentLocalizer(moment);
+const components = { BigCalendar };
+
+const AppClient = parent => class Client extends use(parent) {
+  static title = title;
+  static logo = logo;
+  static components = { ...parent.components, ...components };
+  constructor(params) {
+    super(params);
+    this.BigCalendarLocalizer = localizer;
+
+    ...
+
+  }
+}
+````
+`CalendarForm.js`
+````
+import { Elements, Form } from 'katejs/lib/client';
+
+class Calendar extends Form {
+  static title = 'Calendar'; // заголовок формы
+
+  constructor(sys, params) {
+    super(sys);
+
+    this.elements = [
+      {
+        type: 'BigCalendar',
+        localizer: this.app.BigCalendarLocalizer,
+        events: [],
+      },
+    ];
+    
+    ....
+    
+  }
+}
+
+````
 
 ## Поддержка IE и браузеров без объекта Proxy
 Для возможности вызова методов api как `app.Entity.method(params)` необходимо

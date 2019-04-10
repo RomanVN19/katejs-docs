@@ -171,10 +171,10 @@ export default class Template extends Entity {
       });
 
       const result = await this.put({ data: { uuid, body: item }, transaction });
-      transaction.commit();
+      await transaction.commit();
       return result;
     } catch (error) {
-      transaction.rollback();
+      await transaction.rollback();
       return { error };
     }
   }
