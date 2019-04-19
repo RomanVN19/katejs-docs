@@ -302,7 +302,7 @@ this.content.tableId.addRow({ title: 'row3' });
 Дочерние элементы группируются по вертикали.
 Ипользуется в композиции с `Сеткой` (GRID)
 
-## DIALOG - Модальный диалог.
+## MODAL - Модальный диалог.
 ````
 {
   type: Elements.MODAL,
@@ -333,4 +333,32 @@ this.content.tableId.addRow({ title: 'row3' });
 Диалог должен быть создан в конструторе формы. Для отображения нужно установить поле `open`:
 ````
   this.content.dialogId.open = true;
+````
+
+## IMAGE - Изображение.
+````
+{
+  type: Elements.IMAGE,
+  title: 'Image alt text',
+  src: '/path/to/image.jpf',
+}
+````
+
+## LOADING - Спиннер загрузки.
+````
+{
+  type: Elements.LOADING,
+  alt: 'Spinner alt text' || 'Loading...',
+}
+````
+
+## PAGINATION - Страницы пагинации
+````
+{
+  type: Elements.PAGINATION,
+  page: 1, // current page
+  pageChange: (a => a), // page change handler
+  length: 5, // pages count
+  max: 0, // max page
+}
 ````

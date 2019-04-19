@@ -10,7 +10,7 @@ nav_order: 10
 
 ## Подключение
 ````
-npm isntall katejs-user
+npm isntall katejs-user --save
 ````
 `AppServer`
 ````
@@ -31,6 +31,20 @@ const AppServer = parent => class Server extends use(parent, AppUser) {
       method: 'query',
       access: true,
     });
+    
+    // You can add custom access rules to fill it in role methods table
+    this.accessRules.push(
+      {
+        entity: 'Schedule',
+        method: 'AccessAllEvents',
+      },
+    );
+
+    // You can add additional fields to token
+    this.userTokenFields.push(
+      { field: 'school', value: user => user.school && user.school.uuid },
+    );
+
   }
 };
 ````
@@ -80,7 +94,7 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
 Система основана на сущностях и обращении к их методам. Модуль ограничивает доступ
 к вызову методов сущностей через api по принципу "запрещено все что не разрешено".
 
-##№ Роли
+### Роли
 Разрешенные методы определяются в Роли с помощью двух таблиц
 - Типовые методы
 В таблице указывается название сущности и флажками отмечаются один и более типовых
@@ -108,4 +122,153 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
 пользователю базову роль и специфическую. Такое разделение позволит обновлять
 роли в процессе разработки "в одном месте".
 
-## Описание API
+## Добавление дополнительных полей в User
+
+`./entities/UserMixin.js`
+````
+import Fields from 'katejs/lib/fields';
+
+export User = {
+  fields: [
+    {
+      name: 'school',
+      type: Fields.REFERENCE,
+      entity: 'School',
+    },
+  ],
+};
+
+export default Entity => class UserMixin extends Entity {
+  constructor(args) {
+    super(args);
+    this.structure.fields.push(...User.fields);
+  }
+};
+````
+`AppServer.js`
+````
+...
+    this.entities = {
+      ...this.entities,
+      User: UserMixin(this.entities.User),
+    };
+
+    // You can add additional fields to token, if need
+    this.userTokenFields.push(
+      { field: 'school', value: user => user.school && user.school.uuid },
+    );
+
+...
+````
+`./forms/UserItemMixin.js`
+````
+import { getElement } from 'katejs/lib/client';
+import Fields from 'katejs/lib/fields';
+
+export User = {
+  fields: [
+    {
+      name: 'school',
+      type: Fields.REFERENCE,
+      entity: 'School',
+    },
+  ],
+};
+
+export default ItemForm => class UserItem extends ItemForm {
+  constructor(args) {
+    super(args);
+    User.fields.forEach(field => this.elements.push(getElement(field, this)));
+  }
+};
+
+````
+`AppClient.js`
+````
+...
+    this.forms = {
+      ...this.forms,
+      UserItem: UserItemMixin(this.forms.UserItem),
+    };
+...
+````
+
+## Описание API для внешних приложений
+
+Все запросы выполняются методом `POST` с параметрами в `JSON` формате
+````
+content-type: application/json
+````
+При попытке доступа к ресурсу на который у пользователя нет прав система вернет ответ
+````
+Status Code: 403 Forbidden
+````
+### Аутентификация
+Аутентификация осуществляется с помощью токенов JWT
+
+В каждый запрос к системе необходимо включать токен в заголоке http запроса `Authorization`:
+````
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiNmZlM2JiYjktMWZjNy00ZDdiLTliY
+````
+Токен получается в начале работы приложения с помощью авторизации
+
+Время жизни токена - 30 минут. По его истечении, запрос к api выдаст ошибку
+````
+Status Code: 401 Unauthorized
+````
+после чего необходимо обновить токен и выполнить требуемый запрос еще раз.
+
+### Авторизация
+````
+Request URL: /api/User/auth
+Request Method: POST
+Body: {"username":"user@user.com","password":"user","device":"device-580539"}
+````
+- username - имя пользователя, обычно e-mail.
+- password - пароль пользователя.
+- device - идентификатор устройства. Любая строка, которая будет постоянной для устройства
+с которого происходит логин.
+
+`Response`
+````
+{
+  "message":"OK",
+  "token":"eyJhbGciOiJI...vyyAwGxU",
+  "user":{
+    "uuid":"6fe3bbb9-1fc7-4d7b-9bc9-bfde761bee8f",
+    "title":"John Smith",
+    "username":"user@user.com",
+    "roles":["5fb97124-16d9-4acd-8593-711a279cd05c"],
+  },
+ "device":"device-580539"
+}
+````
+- `user` - Информация о пользователе. Необходимо сохранить ее (uuid пользователя требуется для обновления токена)
+  - `facilities` - Доступные пользователю объекты
+- `token` - Авторизационный токен для использования в запросах
+
+### Обновление токена
+
+Для обновления токена следует выполнить запрос к api с передачей сущшествующего токена
+````
+Request URL: /api/User/renew
+Request Method: POST
+Body: 
+{
+	"uuid": "6fe3bbb9-1fc7-4d7b-9bc9-bfde761bee8f",
+	"token":"eyJhbGciOiJ ... PKtAmU0",
+	"device":"test-device"
+}
+````
+- `uuid` - идентификатор пользователя
+- `token` - имеющийся просроченный токен
+- `device` - строка - идентификатор устройства
+
+`Response` - такой же, как и при авторизации, включая обновленный токен
+````
+{
+  "message":"OK",
+  "token":"eyJhbGciOiJI...vyyAwGxU",
+  "user":{ ... }
+}
+````

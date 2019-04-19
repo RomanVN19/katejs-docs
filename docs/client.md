@@ -138,20 +138,36 @@ this.app.showAlert({ type: 'success', title: 'Saved!', timeout: 5 });
 передавая все поля элемента как `props`.
 При необходимости можно дополнить их собственными.
 
+`components.js`
+````
+import React from 'react';
+import BigCalendar from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import moment from 'moment';
+
+const calendarWrapperStyle = { height: 800 };
+const localizer = BigCalendar.momentLocalizer(moment);
+
+export const CalendarWrapper = props => (
+  <div style={calendarWrapperStyle}>
+    <BigCalendar localizer={localizer} {...props} />
+  </div>
+);
+
+````
+
 `AppClient.js`
 ````
-import BigCalendar from 'react-big-calendar';
+import { CalendarWrapper } from './components';
 
-const localizer = BigCalendar.momentLocalizer(moment);
-const components = { BigCalendar };
+const components = { BigCalendar: CalendarWrapper };
 
 const AppClient = parent => class Client extends use(parent) {
   static title = title;
   static logo = logo;
-  static components = { ...parent.components, ...components };
   constructor(params) {
     super(params);
-    this.BigCalendarLocalizer = localizer;
+    this.constructor.components = { ...this.constructor.components, ...components };
 
     ...
 
@@ -171,7 +187,6 @@ class Calendar extends Form {
     this.elements = [
       {
         type: 'BigCalendar',
-        localizer: this.app.BigCalendarLocalizer,
         events: [],
       },
     ];
