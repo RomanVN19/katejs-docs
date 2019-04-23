@@ -7,7 +7,7 @@ import env from './front.env.json';
 
 const AppClient = parent => class Client extends use(parent, AppUser) {
   static title = title;
-  static logo = logo;
+  
   static primaryColor = '#5F77D8';
 
   constructor(params) {
