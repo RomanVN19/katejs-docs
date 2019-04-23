@@ -100,6 +100,9 @@ const AppClient = parent => class Client extends use(parent) {
         // this.setMenu([]);
         // this.open('none', null, 'leftMenu');
         this.open('Auth');
+      } else {
+        this.open('M', {}, 'leftMenu');
+        this.setMenuParent(this.menu);
       }
     }
   }

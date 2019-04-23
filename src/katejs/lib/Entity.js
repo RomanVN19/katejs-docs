@@ -214,7 +214,7 @@ export default class Entity {
         order.push(orderField.name);
       }
     }
-    if (this[tables]) {
+    if (this[tables] && !data.noOptions) {
       Object.keys(this[tables]).forEach(tableName =>
         order.push([{ model: this[tables][tableName][model], as: tableName }, 'rowNumber']));
     }
