@@ -15,13 +15,14 @@
     "no-underscore-dangle": 0,
     "react/jsx-filename-extension": 0,
     "react/prop-types": 0,
-    "object-curly-newline": 0
+    "object-curly-newline": 0,
+    "lines-between-class-members": 0
   },
   "globals": {
-    "window": true,
-    "document": true,
-    "navigator": true,
-    "fetch": true
+      "window": true,
+      "document": true,
+      "navigator": true,
+      "fetch": true
   },
   "settings": {
     "import/resolver": {

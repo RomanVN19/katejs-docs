@@ -3,11 +3,11 @@
 # dependencies
 /node_modules
 
-# testing
-/coverage
-
 # production
-/lib
+/build
+
+# env
+/src/front.env.json
 
 # misc
 .DS_Store
@@ -19,3 +19,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+.idea
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
