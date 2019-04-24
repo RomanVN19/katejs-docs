@@ -32,13 +32,22 @@ export default class Menu extends Form {
     }
     this.app.open(item.form);
     this.content.menu.elements = this.content.menu.elements
-      .map(menuItem => ({ ...menuItem, current: menuItem.key === (item.form || item.onClick) }));
+      .map(menuItem => ({
+        ...menuItem,
+        current: menuItem.key === (item.form || item.onClick),
+        submenu: menuItem.submenu
+          ? menuItem.submenu.map(subItem => ({
+            ...subItem,
+            current: subItem.key === (item.form || item.onClick),
+          })) : null,
+      }));
   }
   getMenuElements(menu) {
     return menu.map(item => ({
       title: item.title,
       key: item.form || item.onClick,
       icon: item.icon,
+      submenu: item.submenu ? this.getMenuElements(item.submenu) : null,
       onClick: () => this.onClick(item),
     }));
   }

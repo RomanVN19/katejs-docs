@@ -36,11 +36,85 @@ import Check from '@material-ui/icons/Check';
 import Warning from '@material-ui/icons/Warning';
 import Snackbar from 'material-kit-react-package/dist/components/Snackbar/SnackbarContent';
 import Tooltip from '@material-ui/core/Tooltip';
+import Collapse from '@material-ui/core/Collapse';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
 
 import { KateForm } from 'kate-form';
 
 import { renderThumb } from './Layout';
 
+class Submenu extends React.Component {
+  state = {
+    open: this.props.route.expanded,
+  };
+  handleClick = (event) => {
+    event.stopPropagation();
+    this.setState(state => ({ open: !state.open }));
+  };
+
+  render() {
+    const { open } = this.state;
+    const { classes, drawerOpen, route, t } = this.props;
+    return (
+      <Fragment>
+        <ListItem
+          button
+          onClick={route.onClick}
+          className={cx(classes.listItem, {
+            [classes.listItemCollapsed]: !drawerOpen,
+            [classes.currentItem]: route.current,
+          })}
+        >
+          {drawerOpen
+            ? (
+              <Fragment>
+                <ListItemIcon className={classes.icon}>
+                  {route.icon ? <route.icon /> : <DocIcon />}
+                </ListItemIcon>
+                <ListItemText primary={t(route.title)} />
+                {open
+                  ? <ExpandLess onClick={this.handleClick} />
+                  : <ExpandMore onClick={this.handleClick} />}
+              </Fragment>
+            ) : (
+              <Tooltip
+                title={t(route.title)}
+                placement="right"
+                classes={{ tooltip: classes.tooltip }}
+              >
+                <span>
+                  <ListItemIcon className={classes.icon}>
+                    {route.icon ? <route.icon /> : <DocIcon />}
+                  </ListItemIcon>
+                </span>
+              </Tooltip>
+            )}
+        </ListItem>
+        <Collapse in={open && drawerOpen} timeout="auto" unmountOnExit className={classes.nestedListItem}>
+          {
+            route.submenu.map(subroute => (
+              <ListItem
+                button
+                onClick={subroute.onClick}
+                key={subroute.key}
+                className={cx(classes.listItem, classes.listItemNested, {
+                  [classes.listItemCollapsed]: !drawerOpen,
+                  [classes.currentItem]: subroute.current,
+                })}
+              >
+                <ListItemIcon className={classes.icon}>
+                  {subroute.icon ? <route.icon /> : <DocIcon />}
+                </ListItemIcon>
+                <ListItemText primary={t(subroute.title)} />
+              </ListItem>
+            ))
+          }
+        </Collapse>
+      </Fragment>
+    );
+  }
+}
 
 const layoutMenuConnector = ({ t, elements, classes, title,
   drawerOpen, logo, switchDrawer, path, brandClick }) => {
@@ -117,7 +191,16 @@ const layoutMenuConnector = ({ t, elements, classes, title,
               </NavLink>
             );
           }
-          return menuItem;
+          return route.submenu
+            ? (
+              <Submenu
+                key={route.key}
+                route={route}
+                classes={classes}
+                t={t}
+                drawerOpen={drawerOpen}
+              />
+            ) : menuItem;
         })
       }
       <ListItem>
