@@ -39,7 +39,8 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
       ...this.menu,
       {
         title: 'SubMenu',
-        onClick: () => {},
+        // onClick: () => {},
+        // form: 'UserList',
         submenu: [
           {
             title: 'Users',
@@ -52,7 +53,6 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
         ],
       },
     ];
-
     this.saveAuth = true;
   }
 };
