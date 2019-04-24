@@ -41,19 +41,20 @@ const formatValue = (format, value) => {
 function CustomTablePlain({ ...props }) {
   const {
     classes, tableHead, tableData, tableHeaderColor,
-    rowClick, cellStyle = () => ({}), t,
+    rowClick, cellStyle = () => ({}), t, headStyle,
   } = props;
   return (
     <div className={classes.tableResponsive}>
       <Table className={classes.table}>
         {tableHead !== undefined ? (
           <TableHead className={classes[`${tableHeaderColor}TableHeader`]}>
-            <TableRow>
-              {tableHead.map(({ title, width }, key) => (
+            <TableRow style={headStyle}>
+              {tableHead.map(({ title, width, style }, key) => (
                 <TableCell
                   className={`${classes.tableCell} ${classes.tableHeadCell}`}
                   key={key}
                   width={width}
+                  style={style}
                 >
                   {t(title)}
                 </TableCell>
