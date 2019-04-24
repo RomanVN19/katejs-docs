@@ -108,6 +108,11 @@ const styles = theme => ({
     padding: '16px 15px!important',
     marginLeft: '16px!important',
   },
+  listItemNested: {
+    width: '100%',
+    marginLeft: '0',
+    marginRight: '0',
+  },
 });
 
 
