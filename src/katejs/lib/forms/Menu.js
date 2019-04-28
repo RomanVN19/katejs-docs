@@ -48,6 +48,7 @@ export default class Menu extends Form {
       key: item.form || item.onClick,
       icon: item.icon,
       submenu: item.submenu ? this.getMenuElements(item.submenu) : null,
+      form: item.form,
       onClick: () => this.onClick(item),
     }));
   }
