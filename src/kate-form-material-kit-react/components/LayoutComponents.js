@@ -53,14 +53,14 @@ class Submenu extends React.Component {
     this.setState(state => ({ open: !state.open }));
   };
 
-  render() {
+  render() { 
     const { open } = this.state;
     const { classes, drawerOpen, route, t } = this.props;
     return (
       <Fragment>
         <ListItem
           button
-          onClick={route.onClick}
+          onClick={route.form ? route.onClick : this.handleClick}
           className={cx(classes.listItem, {
             [classes.listItemCollapsed]: !drawerOpen,
             [classes.currentItem]: route.current,
