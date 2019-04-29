@@ -53,6 +53,14 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
         ],
       },
     ];
+
+    setTimeout(() => {
+      this.loaderOn();
+      setTimeout(() => {
+        this.loaderOff();
+      }, 2000);
+    }, 2000);
+
     this.saveAuth = true;
   }
 };
