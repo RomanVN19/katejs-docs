@@ -74,6 +74,7 @@ export default class PlatformApp extends App {
     };
     this.forms = { M: Menu, A: Alerts };
     this.drawerOpen = true;
+    this.loading = false;
 
     this.entityMethods = {}; // for Proxy polyfill
   }
@@ -81,6 +82,21 @@ export default class PlatformApp extends App {
     this.drawerOpen = drawerOpen;
     this.layoutComponent.forceUpdate();
   }
+
+  loaderOn() {
+    setTimeout(() => {
+      this.loading = true;
+      this.layoutComponent.forceUpdate();
+    }, 0);
+  }
+
+  loaderOff() {
+    setTimeout(() => {
+      this.loading = false;
+      this.layoutComponent.forceUpdate();
+    }, 0);
+  }
+
   setMenu(menu, topElements) {
     if (menu) {
       if (this[menuForm]) {

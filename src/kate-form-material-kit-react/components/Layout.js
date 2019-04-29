@@ -24,6 +24,7 @@ import React, { Component } from 'react';
 import { withStyles, MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { defaultFont, theme as kitTheme, getThemeColors } from 'material-kit-react-package/dist/assets/jss/material-kit-react';
 import tooltipStyle from 'material-kit-react-package/dist/assets/jss/material-kit-react/tooltipsStyle';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 const defaultTheme = createMuiTheme(kitTheme);
 
@@ -113,6 +114,11 @@ const styles = theme => ({
     marginLeft: '0',
     marginRight: '0',
   },
+  loadingBlock: {
+    width: '100%',
+    position: 'fixed',
+    zIndex: 1500,
+  },
 });
 
 
@@ -148,6 +154,9 @@ class MainLayout extends Component {
         </div>
         <div className={classes.snackbar}>
           {content.alerts}
+        </div>
+        <div className={classes.loadingBlock} style={{ display: app.loading ? 'block' : 'none' }}>
+          <LinearProgress />
         </div>
       </div>
     );
