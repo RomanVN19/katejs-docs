@@ -35,6 +35,7 @@ import CardBody from 'material-kit-react-package/dist/components/Card/CardBody';
 import NavPills from 'material-kit-react-package/dist/components/NavPills/NavPills';
 
 import Paginations from 'material-kit-react-package/dist/components/Pagination/Pagination';
+import LinearProgress from 'material-kit-react-package/dist/components/CustomLinearProgress/CustomLinearProgress';
 
 import LoadingImg from './img/loading.gif';
 
@@ -69,6 +70,7 @@ const Elements = {
 
   PAGINATION: Symbol('paginationConnector'),
   LOADING: Symbol('loadingConnector'),
+  PROGRESS: Symbol('progressConnector'),
   IMAGE: Symbol('imageConnector'),
   ...LayoutElements,
 };
@@ -393,37 +395,6 @@ const modalActionsConnector = ({ path, elements }) => (
   </Fragment>
 );
 
-// const uploadConnector = (allProps) => {
-//   const {
-//     title, value, onChange, setData, path,
-//     dataPath, format, disabled, rows, rowsMax, style, password,
-//     t,
-//     ...props
-//   } = allProps;
-//   const change = (e) => {
-//     console.log(e.target.value);
-//   };
-//   const inputProps = { style };
-//   inputProps.type = 'file';
-//   return (
-//     <CustomInput
-//       labelText={t(title)}
-//       formControlProps={{
-//         fullWidth: true,
-//       }}
-//       inputProps={{
-//         value: value || '',
-//         onChange: change,
-//         multiline: rows && true,
-//         rows,
-//         rowsMax,
-//         disabled,
-//         inputProps,
-//       }}
-//       {...props}
-//     />
-//   );
-// };
 
 const stylePaginationWrapper = {
   marginTop: 20,
@@ -470,6 +441,9 @@ const imageConnector = ({ title, value, setData, path, tag, t, ...props }) => (
   <img alt={t(props.alt || props.title || 'image')} {...props} />
 );
 
+const progressConnector = props => (
+  <LinearProgress color="primary" {...props} />
+);
 
 const components = {
   [Elements.BUTTON]: buttonConnector,
@@ -497,6 +471,7 @@ const components = {
   [Elements.PAGINATION]: paginationConnector,
   [Elements.LOADING]: loadingConnector,
   [Elements.IMAGE]: imageConnector,
+  [Elements.PROGRESS]: progressConnector,
   ...layoutComponents,
 };
 
