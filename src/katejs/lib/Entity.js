@@ -18,13 +18,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with KateJS.  If not, see <https://www.gnu.org/licenses/>.
 */
+import Fields from './fields';
+
 export const model = Symbol('model');
 export const literal = Symbol('literal');
 export const modelGetOptions = Symbol('modelGetOptions');
 export const modelUpdateFields = Symbol('modelUpdateFields');
 export const tables = Symbol('tables');
 export const rawQuery = Symbol('rawQuery');
-import Fields from './fields';
 
 export const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
 
