@@ -47,6 +47,7 @@ export default class Http {
       this.app.use(async (ctx, next) => {
         ctx.vary('Origin');
         ctx.set('Access-Control-Allow-Origin', '*');
+        ctx.set('Access-Control-Expose-Headers', '*');
         if (ctx.method !== 'OPTIONS') {
           await next();
         } else {
@@ -96,8 +97,11 @@ export default class Http {
       return;
     }
 
-    const { response, error } = (await entityObject[method]({ data, ctx })) || { error: { message: 'no response'}};
+    const { response, error, headers } = (await entityObject[method]({ data, ctx })) || { error: { message: 'no response'}};
     ctx.body = response || error;
     ctx.status = error ? (error.status || 500) : 200;
+    if (headers) {
+      Object.keys(headers).forEach(header => ctx.set(header, headers[header]));
+    }
   }
 }

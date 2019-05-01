@@ -60,7 +60,7 @@ const AppClient = parent => class Client extends use(parent) {
       }
     }
   }
-  async request(url, params) {
+  async request(url, params, handlers) {
     if (this.authorization) {
       const requestParams = {
         ...params,
@@ -68,7 +68,7 @@ const AppClient = parent => class Client extends use(parent) {
           authorization: `Bearer ${this.authorization}`,
         },
       };
-      const result = await super.request(url, requestParams);
+      const result = await super.request(url, requestParams, handlers);
       if (result.error && result.errorResponse && result.errorResponse.status === 401 && !url.endsWith('/User/renew')) {
         // need renew token
         const newTokenResponse = await this.User.renew({
@@ -79,14 +79,14 @@ const AppClient = parent => class Client extends use(parent) {
         // console.log('got new token', newTokenResponse);
         if (newTokenResponse.response) {
           this.successAuth({ ...newTokenResponse.response, skipRedirect: true });
-          return this.request(url, requestParams);
+          return this.request(url, requestParams, handlers);
         }
         this.logout();
         return { error: { message: 'token not valid' } };
       }
       return result;
     }
-    return super.request(url, params);
+    return super.request(url, params, handlers);
   }
   async afterInit() {
     if (super.afterInit) super.afterInit();

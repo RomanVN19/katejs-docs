@@ -1,5 +1,7 @@
-import { use, Elements } from 'katejs/lib/client';
+import { use } from 'katejs/lib/client';
 import AppUser from 'katejs-user/lib/AppClient';
+
+import TestForm from './forms/TestForm';
 
 import { structures, title, packageName } from './structure';
 
@@ -15,18 +17,31 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
 
     this.baseUrl = env.apiUrl || '/api';
 
-    this.userRegistration = {
-      passwordTitle: 'Password (at least 8 symbols)',
-      passwordValid: val => val && val.length > 7,
-    };
-    this.userAuthorization = {
-      usernameTitle: 'E-mail',
-    };
-
     this.init({ structures, addToMenu: true });
 
+    this.makeApiLinks({ entities: ['TestEntity'] });
+
+    this.forms = {
+      ...this.forms,
+      TestForm,
+    };
+
+    this.menu = [
+      ...this.menu,
+      {
+        title: 'SubMenu',
+        // form: 'UserList',
+        submenu: [
+          {
+            title: 'Test form',
+            form: 'TestForm',
+          },
+        ],
+      },
+    ];
+
     this.menu.forEach((menuItem) => {
-      if (this.forms[menuItem.form].entity && !menuItem.rule) {
+      if (menuItem.form && this.forms[menuItem.form].entity && !menuItem.rule) {
         // eslint-disable-next-line no-param-reassign
         menuItem.rule = {
           entity: this.forms[menuItem.form].entity,
@@ -35,32 +50,15 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
       }
     });
 
-    this.menu = [
-      ...this.menu,
-      {
-        title: 'SubMenu',
-        // onClick: () => {},
-        // form: 'UserList',
-        submenu: [
-          {
-            title: 'Users',
-            form: 'UserList',
-          },
-          {
-            title: 'Tasks',
-            form: 'TaskList',
-          },
-        ],
-      },
-    ];
 
-    setTimeout(() => {
-      this.loaderOn();
-      setTimeout(() => {
-        this.loaderOff();
-      }, 2000);
-    }, 2000);
-
+    // katejs-user params
+    this.userRegistration = {
+      passwordTitle: 'Password (at least 8 symbols)',
+      passwordValid: val => val && val.length > 7,
+    };
+    this.userAuthorization = {
+      usernameTitle: 'E-mail',
+    };
     this.saveAuth = true;
   }
 };

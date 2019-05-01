@@ -61,39 +61,54 @@ export default class App {
   }
   /* global FormData */
   // eslint-disable-next-line class-methods-use-this
-  async request(url, params = {}) {
+  async request(url, params = {}, handlers = {}) {
     const headers = { ...params.headers };
     if (!(params.body instanceof FormData)) {
       headers['content-type'] = 'application/json';
     }
-    return fetch(url, {
-      ...params,
-      headers,
-    })
-      .then((response) => {
-        if (response.headers.get('content-type').indexOf('application/octet-stream') > -1) {
-          return response
-            .blob()
-            .then(data => ({ response, data }))
-            .catch(() => ({ response }));
+    try {
+      const response = await fetch(url, {
+        ...params,
+        headers,
+      });
+      let data;
+      if (response.headers.get('content-type').indexOf('application/octet-stream') > -1) {
+        if (handlers.response) handlers.response(response);
+
+        const reader = response.body.getReader();
+        let receivedLength = 0;
+        const chunks = [];
+
+        while (true) {
+          // eslint-disable-next-line no-await-in-loop
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
+          chunks.push(value);
+          receivedLength += value.length;
+          if (handlers.chunk) handlers.chunk(value, receivedLength);
         }
-        if (response.headers.get('content-type').indexOf('application/json') === -1) {
-          return response
-            .text()
-            .then(data => ({ response, data }))
-            .catch(() => ({ response }));
+
+        const chunksAll = new Uint8Array(receivedLength);
+        let position = 0;
+        for (let index = 0; index < chunks.length; index += 1) {
+          chunksAll.set(chunks[index], position);
+          position += chunks[index].length;
         }
-        return response
-          .json()
-          .then(data => ({ response, data }))
-          .catch(() => ({ response }));
-      })
-      .then(({ response, data }) => {
-        if (response.ok) {
-          return ({ response: data });
-        }
-        return ({ error: data, errorResponse: response });
-      })
-      .catch(error => ({ error }));
+
+        data = chunksAll; // await response.blob();
+      } else if (response.headers.get('content-type').indexOf('application/json') === -1) {
+        data = await response.text();
+      } else {
+        data = await response.json();
+      }
+      if (response.ok) {
+        return ({ response: data });
+      }
+      return ({ error: data, errorResponse: response });
+    } catch (error) {
+      return { error };
+    }
   }
 }

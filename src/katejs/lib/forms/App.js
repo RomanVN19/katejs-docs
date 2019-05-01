@@ -143,10 +143,10 @@ export default class PlatformApp extends App {
     entities.forEach((entity) => {
       const proxyHandlers = {
         get(target, prop) {
-          return data => app.request(`${app.baseUrl}/${entity}/${prop}`, {
+          return (data, handlers) => app.request(`${app.baseUrl}/${entity}/${prop}`, {
             method: 'post',
             body: data instanceof FormData ? data : JSON.stringify(data),
-          });
+          }, handlers);
         },
         set() {
           return true;
