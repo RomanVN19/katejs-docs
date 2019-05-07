@@ -38,7 +38,18 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
           },
         ],
       },
+      {
+        title: 'Test badge',
+        form: 'TestForm',
+        badge: 11,
+      },
     ];
+
+    // test badge update
+    setInterval(() => {
+      this.menu.find(item => item.title === 'Test badge').badge += 1;
+      this.setMenu(this.menu);
+    }, 2000);
 
     this.menu.forEach((menuItem) => {
       if (menuItem.form && this.forms[menuItem.form].entity && !menuItem.rule) {

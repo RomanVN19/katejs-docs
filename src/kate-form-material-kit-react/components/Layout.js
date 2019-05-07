@@ -119,6 +119,12 @@ const styles = theme => ({
     position: 'fixed',
     zIndex: 1500,
   },
+  badge: {
+    backgroundColor: theme.palette.primary.main,
+    color: '#ffffff',
+    padding: '0px 5px!important',
+    borderRadius: '12px',
+  },
 });
 
 

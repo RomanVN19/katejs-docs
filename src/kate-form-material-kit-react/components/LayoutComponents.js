@@ -23,6 +23,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import DocIcon from '@material-ui/icons/Description';
 import { NavLink } from 'react-router-dom';
 import cx from 'classnames';
@@ -167,7 +168,16 @@ const layoutMenuConnector = ({ t, elements, classes, title,
                     <ListItemIcon className={classes.icon}>
                       {route.icon ? <route.icon /> : <DocIcon />}
                     </ListItemIcon>
-                    <ListItemText primary={t(route.title)} />
+                    <ListItemText primary={`${t(route.title)}`} />
+                    {
+                      route.badge !== undefined && (
+                        <ListItemSecondaryAction>
+                          <div className={classes.badge}>
+                            {route.badge}
+                          </div>
+                        </ListItemSecondaryAction>
+                      )
+                    }
                   </Fragment>
                 ) : (
                   <Tooltip
