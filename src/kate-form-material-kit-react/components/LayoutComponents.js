@@ -145,7 +145,7 @@ const layoutMenuConnector = ({ t, elements, classes, title,
       </ListItem>
       {
         drawerOpen && (
-          <div>
+          <div className={classes.topElements}>
             <KateForm path={`${path}.topElements`} />
           </div>
         )

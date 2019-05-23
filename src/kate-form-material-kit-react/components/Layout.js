@@ -48,7 +48,7 @@ const styles = theme => ({
   },
   drawerPaper: {
     width: collapsedDrawerWidth,
-    backgroundColor: '#222222',
+    backgroundColor: theme.palette.drawer.background,
     transition: 'all 100ms linear',
   },
   drawerOpen: {
@@ -56,17 +56,24 @@ const styles = theme => ({
   },
   list: {
     '& svg path': {
-      color: '#fff',
+      color: theme.palette.drawer.main,
+    },
+    '& svg': {
+      fill: theme.palette.drawer.main,
     },
     '& span': {
-      color: '#fff',
+      color: theme.palette.drawer.main,
     },
     '& div': {
       paddingLeft: 16,
       paddingRight: 16,
+      color: theme.palette.drawer.main,
     },
   },
   currentItem: {
+    '& span': {
+      color: '#eeeeee!important',
+    },
     backgroundColor: theme.palette.primary.main,
     boxShadow: `0 12px 20px -10px ${theme.palette.primary.shadow}, 0 4px 20px 0px rgba(0, 0, 0, 0.12), 0 7px 8px -5px ${theme.palette.primary.shadow}`,
     '&:hover': {
@@ -82,7 +89,7 @@ const styles = theme => ({
     position: 'relative',
     ...defaultFont,
     '&:hover': {
-      backgroundColor: '#666666',
+      backgroundColor: theme.palette.drawer.listHover,
     },
   },
   icon: {
@@ -178,10 +185,18 @@ const Layout = withStyles(styles)(MainLayout);
 let userColorTheme;
 const StyledLayout = (props) => {
   const color = props.app.constructor.primaryColor;
+  const drawer = props.app.constructor.drawerPalette;
   if (color && !userColorTheme) {
     userColorTheme = createMuiTheme({
       palette: {
-        primary: getThemeColors(color),
+        primary: {
+          ...getThemeColors(color),
+        },
+        drawer: {
+          main: drawer ? drawer.main : '#ffffff',
+          background: drawer ? drawer.background : '#222222',
+          listHover: drawer ? drawer.listHover : '#666666',
+        },
       },
     });
   }
