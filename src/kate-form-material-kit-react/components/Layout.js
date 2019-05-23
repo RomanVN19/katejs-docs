@@ -95,6 +95,10 @@ const styles = theme => ({
     width: 48,
     height: 48,
   },
+  iconLogoFull: {
+    margin: 0,
+    maxWidth: 200,
+  },
   listItemCollapsed: {
     margin: '10px 0 0',
   },

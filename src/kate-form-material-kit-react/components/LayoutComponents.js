@@ -118,7 +118,7 @@ class Submenu extends React.Component {
 }
 
 const layoutMenuConnector = ({ t, elements, classes, title,
-  drawerOpen, logo, switchDrawer, path, brandClick }) => {
+  drawerOpen, logo, fullLogo, switchDrawer, path, brandClick }) => {
   const drawerContent = (
     <List className={classes.list}>
       <ListItem
@@ -128,9 +128,17 @@ const layoutMenuConnector = ({ t, elements, classes, title,
           [classes.listItemCollapsed]: !drawerOpen,
         })}
       >
-        <ListItemIcon className={drawerOpen ? classes.iconLogo : classes.icon}>
-          {logo ? <img src={logo} alt="logo" /> : <AppIcon />}
-        </ListItemIcon>
+        {
+          fullLogo ? (
+            <ListItemIcon className={drawerOpen ? classes.iconLogoFull : classes.icon}>
+              {logo ? <img src={logo} alt="logo" /> : <AppIcon />}
+            </ListItemIcon>
+          ) : (
+            <ListItemIcon className={drawerOpen ? classes.iconLogo : classes.icon}>
+              {logo ? <img src={logo} alt="logo" /> : <AppIcon />}
+            </ListItemIcon>
+          )
+        }
         {drawerOpen ?
           <ListItemText primary={t(title)} />
           : null}

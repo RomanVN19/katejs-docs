@@ -275,7 +275,7 @@ class User extends Entity {
   async query(params) {
     const result = await super.query(params);
     if (params && params.ctx && result.response) {
-      result.response = result.response.map(item => ({ ...item, passwordHash: undefined }));
+      result.response = result.response.map(item => ({ ...item, passwordHash: undefined, tokents: undefined }));
     }
     return result;
   }

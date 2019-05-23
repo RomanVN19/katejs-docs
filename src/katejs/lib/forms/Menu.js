@@ -15,6 +15,7 @@ export default class Menu extends Form {
       switchDrawer: this.switchDrawer,
       title: this.app.constructor.title,
       logo: this.app.constructor.logo,
+      fullLogo: this.app.constructor.fullLogo,
       brandClick: this.app.brandClick || (() => this.onClick({ form: 'none' })),
       topElements: [],
     }];
