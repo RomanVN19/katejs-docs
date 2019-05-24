@@ -135,7 +135,7 @@ const AppClient = parent => class Client extends use(parent) {
         type: Elements.LABEL,
         tag: 'h4',
         title: user.title,
-        style: { color: '#fff' },
+        // style: { color: '#fff' },
       },
     ];
     if (user.roles && user.roles[0] && this.userRolesProps) {
@@ -144,7 +144,7 @@ const AppClient = parent => class Client extends use(parent) {
         type: Elements.LABEL,
         tag: 'h6',
         title: this.userRolesProps[user.roles[0]].title,
-        style: { color: '#fff' },
+        // style: { color: '#fff' },
       });
     }
     const { forms } = this.getLayout();
