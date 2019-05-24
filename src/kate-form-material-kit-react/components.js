@@ -308,7 +308,7 @@ const cardActionsConnector = ({ path, elements }) => (
   </div>
 );
 
-const tableConnector = ({ columns, value, rowClick, cellStyle, t, headStyle }) => (
+const tableConnector = ({ columns, value, rowClick, cellStyle, t, headStyle, ...rest }) => (
   <TablePlain
     tableHeaderColor="primary"
     tableHead={columns}
@@ -317,6 +317,7 @@ const tableConnector = ({ columns, value, rowClick, cellStyle, t, headStyle }) =
     cellStyle={cellStyle}
     headStyle={headStyle}
     t={t}
+    {...rest}
   />
 );
 
