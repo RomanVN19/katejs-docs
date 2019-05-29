@@ -72,6 +72,7 @@ const AppServer = parent => class Server extends use(parent) {
       },
     };
   }
+
   setAuthParams({ jwtSecret }) {
     this.jwtSecret = jwtSecret;
     this.httpMidlewares.push(jwt({ secret: jwtSecret, passthrough: true }));
@@ -79,6 +80,7 @@ const AppServer = parent => class Server extends use(parent) {
     this.router.post(apiUrl, this.accessControl);
     this.httpMidlewares.push(this.router.routes());
   }
+
   async afterInit() {
     if (super.afterInit) super.afterInit();
     const { response: users } = await this.User.query();
@@ -87,6 +89,7 @@ const AppServer = parent => class Server extends use(parent) {
     }
     this.updateRoles();
   }
+
   async updateRoles() {
     const { response: rolesQuery } = await this.Role.query({ data: { limit: -1 } });
     const roles = {};
@@ -110,6 +113,7 @@ const AppServer = parent => class Server extends use(parent) {
     this.userRolesProps = rolesProps;
     this.logger.info('Roles updated');
   }
+
   allow(params, ruleSet, rule) {
     if (this.skipAuthorization) return true;
     const { ctx } = params;
@@ -121,9 +125,11 @@ const AppServer = parent => class Server extends use(parent) {
       userRoles: this.userRoles,
     });
   }
+
   getRole(entity, method) {
     return getRole({ entity, method, userRoles: this.userRoles });
   }
+
   accessControl = async (ctx, next) => {
     if (!this.allow({ ctx })) {
       ctx.body = { message: 'Access denied!' };

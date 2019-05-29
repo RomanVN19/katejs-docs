@@ -5,17 +5,20 @@ import UserItemMixin from './forms/UserItemMixin';
 import RoleItemMixin from './forms/RoleItemMixin';
 import Auth from './forms/Auth';
 import Registration from './forms/Registration';
+import Profile from './forms/Profile';
+
 import allowMethod from './allow';
 
 import { structures, title, packageName } from './structure';
 
 // saved auth check called right after constructor
 // if need user in app constructor you can call this.checkSavedAuth
-// this order of calls is for aply logic this.saveAuth = false;
+// This order of calls is for aply logic this.saveAuth = false;
 
 
 const AppClient = parent => class Client extends use(parent) {
   static title = title;
+
   constructor(params) {
     super(params);
     this.entityMethods.User = ['needAuthorization', 'auth'];
@@ -34,6 +37,7 @@ const AppClient = parent => class Client extends use(parent) {
       ...this.forms,
       Auth,
       Registration,
+      Profile,
     };
     this.userRoles = {};
     this.user = { roles: [] };
@@ -47,6 +51,7 @@ const AppClient = parent => class Client extends use(parent) {
       },
     };
   }
+
   checkSavedAuth() {
     if (!this.saveAuth || this.authorization) return; // already checked or no needs
     const auth = localStorage.getItem(`${packageName}-auth`);
@@ -60,6 +65,7 @@ const AppClient = parent => class Client extends use(parent) {
       }
     }
   }
+
   async request(url, params, handlers) {
     if (this.authorization) {
       const requestParams = {
@@ -88,6 +94,7 @@ const AppClient = parent => class Client extends use(parent) {
     }
     return super.request(url, params, handlers);
   }
+
   async afterInit() {
     if (super.afterInit) super.afterInit();
     this.checkSavedAuth();
@@ -106,6 +113,7 @@ const AppClient = parent => class Client extends use(parent) {
       }
     }
   }
+
   logout = () => {
     this.authorization = undefined;
     this.user = undefined;
@@ -114,12 +122,23 @@ const AppClient = parent => class Client extends use(parent) {
     this.open('Auth');
     localStorage.removeItem(`${packageName}-auth`);
   }
+
   successAuth({ token, user, roles, rolesProps, skipRedirect, device }) {
     this.authorization = token;
     this.authorizationDevice = device;
     this.user = user;
     this.userRoles = roles;
     this.userRolesProps = rolesProps;
+
+    const profileItem = this.menu.find(item => item.form === 'Profile');
+    if (!profileItem) {
+      this.menu.push({
+        title: this.t('Profile'),
+        form: 'Profile',
+        icon: icons.Profile,
+      });
+    }
+
     const logoutItem = this.menu.find(item => item.onClick === this.logout);
     if (!logoutItem) {
       this.menu.push({
@@ -135,7 +154,6 @@ const AppClient = parent => class Client extends use(parent) {
         type: Elements.LABEL,
         tag: 'h4',
         title: user.title,
-        // style: { color: '#fff' },
       },
     ];
     if (user.roles && user.roles[0] && this.userRolesProps) {
@@ -144,7 +162,6 @@ const AppClient = parent => class Client extends use(parent) {
         type: Elements.LABEL,
         tag: 'h6',
         title: this.userRolesProps[user.roles[0]].title,
-        // style: { color: '#fff' },
       });
     }
     const { forms } = this.getLayout();
@@ -167,6 +184,7 @@ const AppClient = parent => class Client extends use(parent) {
       localStorage.setItem(`${packageName}-device`, this.authorizationDevice);
     }
   }
+
   allow(entity, method) {
     if (typeof entity === 'object') {
       return allowMethod({
@@ -183,6 +201,7 @@ const AppClient = parent => class Client extends use(parent) {
       userRoles: this.userRoles,
     });
   }
+
   setMenuByRules = (menu, topElements) => {
     let filteredMenu;
     if (menu) {

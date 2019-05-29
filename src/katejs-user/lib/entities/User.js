@@ -95,6 +95,7 @@ class User extends Entity {
     });
     return { response: methods };
   }
+
   async get(params) {
     const result = await super.get(params);
     result.response.passwordHash = undefined;
@@ -103,7 +104,9 @@ class User extends Entity {
     }
     return result;
   }
+
   static getHash = password => bcrypt.hash(password, 10);
+
   async beforePut({ body, savedEntity }) {
     if (!savedEntity || body.username !== savedEntity.username) {
       const { response: presetUsers } = await this.query({
@@ -114,6 +117,7 @@ class User extends Entity {
       }
     }
   }
+
   async put(params) {
     // const { data: { body: { username }, uuid } } = params;
     // if (!uuid) {
@@ -134,6 +138,7 @@ class User extends Entity {
     }
     return result;
   }
+
   async getToken(user, device) {
     this.logger.info('Issuing token for user', user.username);
     // eslint-disable-next-line no-param-reassign
@@ -190,6 +195,7 @@ class User extends Entity {
     await this.put({ data: { uuid: user.uuid, body: { tokens } } });
     return result;
   }
+
   async auth({ data }) {
     this.logger.info('Auth attempt ', data.username);
     const { response: users } = await this.query({ data: { where: { username: data.username } } });
@@ -209,6 +215,7 @@ class User extends Entity {
     }
     return { error: { errorField: 'username' } };
   }
+
   async renew({ data }) {
     const { token, uuid } = data;
     const device = data.device || 'no-device';
@@ -220,6 +227,7 @@ class User extends Entity {
     const result = await this.getToken(user, device);
     return result;
   }
+
   async passwordRecovery({ data: { username, url } }) {
     if (!this.app.sendEmail) {
       return { error: { status: 400, message: 'No email service!' } };
@@ -247,6 +255,7 @@ class User extends Entity {
         .replace('%title%', title).replace('%link%', link),
     });
   }
+
   async passwordReset({ data: { username, password, recovery } }) {
     if (!recovery) {
       return { error: { status: 400, message: 'Empty recovery code!' } };
@@ -272,13 +281,15 @@ class User extends Entity {
     }
     return { response: { message: 'OK', passwordHash } };
   }
+
   async query(params) {
     const result = await super.query(params);
     if (params && params.ctx && result.response) {
-      result.response = result.response.map(item => ({ ...item, passwordHash: undefined, tokents: undefined }));
+      result.response = result.response.map(item => ({ ...item, passwordHash: undefined, tokens: undefined }));
     }
     return result;
   }
+
   async register({ data }) {
     this.logger.info('trying register user with params', data);
     if (!this.app.userRegistrationRoleTitle) {
@@ -310,9 +321,13 @@ class User extends Entity {
     }
     return { response: { message: 'OK' } };
   }
-  async profile({ ctx }) {
+
+  async profile({ ctx, data }) {
     if (!ctx || !ctx.state.user) {
       return { error: { status: 400, message: 'No valid token' } };
+    }
+    if (data && data.profile) {
+      return this.put({ ctx, data: { uuid: ctx.state.user.uuid, body: data.profile } });
     }
     return this.get({ ctx, data: { uuid: ctx.state.user.uuid } });
   }
