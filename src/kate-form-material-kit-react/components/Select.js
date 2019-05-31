@@ -201,10 +201,19 @@ class Select extends Component {
       const { selected, options, menuOpened } = this.state;
       if (menuOpened && selected > -1 && options[selected]) {
         this.handleSelectOption(options[selected]);
+      } else if (menuOpened) {
+        this.handleClose();
       }
     }, 500);
   }
   handleClear = () => this.handleSelectOption(null);
+  // eslint-disable-next-line react/sort-comp
+  handleFocus = () => {
+    const { openOnFocus } = this.props;
+    if (openOnFocus) {
+      this.handleSwitch();
+    }
+  }
   render() {
     const {
       classes,
@@ -258,6 +267,7 @@ class Select extends Component {
           {...formControlProps}
           className={formControlClasses}
           onBlur={this.handleBlur}
+          onFocus={this.handleFocus}
         >
           {labelText !== undefined ? (
             <InputLabel
