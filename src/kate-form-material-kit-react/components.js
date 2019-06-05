@@ -41,7 +41,7 @@ import LoadingImg from './img/loading.gif';
 
 import { Select, DateInput, CustomSwitch,
   TablePlain, TableEditable, CustomCheckbox,
-  Modal } from './components/index';
+  Modal, TableResponsive } from './components/index';
 
 import { Elements as LayoutElements, components as layoutComponents } from './components/LayoutComponents';
 
@@ -57,6 +57,7 @@ const Elements = {
 
   TABLE: Symbol('tableConnector'),
   TABLE_EDITABLE: Symbol('tableEditableConnector'),
+  TABLE_RESPONSIVE: Symbol('tableResponsiveConnector'),
 
   GROUP: Symbol('groupConnector'),
   GRID: Symbol('gridConnector'),
@@ -338,6 +339,18 @@ const tableEditableConnector = ({ columns, value, path, t,
     />
 );
 
+const tableResponsiveConnector = ({ columns, value, rowClick, cellStyle, t, headStyle }) => (
+  <TableResponsive
+    tableHeaderColor="primary"
+    tableHead={columns}
+    tableData={value || []}
+    rowClick={rowClick}
+    cellStyle={cellStyle}
+    headStyle={headStyle}
+    t={t}
+  />
+);
+
 
 const tabsConnector = ({ path, elements, setData, active, t }) => {
   const setActiveTab = index => setData('active', index);
@@ -457,7 +470,9 @@ const components = {
   [Elements.CHECKBOX]: checkboxConnector,
 
   [Elements.TABLE]: tableConnector,
+  [Elements.TABLE]: tableResponsiveConnector, // replace with responsive
   [Elements.TABLE_EDITABLE]: tableEditableConnector,
+  [Elements.TABLE_RESPONSIVE]: tableResponsiveConnector,
 
   [Elements.GROUP]: groupConnector,
   [Elements.GRID]: gridConnector,
