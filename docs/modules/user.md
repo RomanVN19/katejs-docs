@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Пользователи и роли
+parent: Модули
 nav_order: 1
 ---
 
