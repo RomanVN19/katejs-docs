@@ -10,12 +10,9 @@ nav_order: 1
 Модуль добавляет функционал пользователей, ролей доступа, token based авторизации.
 
 ## Подключение
-````
-npm isntall katejs-user --save
-````
 `AppServer`
 ````
-import AppUser from 'katejs-user/lib/AppServer';
+import AppUser from 'katejs';
 
 ...
 
@@ -51,7 +48,7 @@ const AppServer = parent => class Server extends use(parent, AppUser) {
 ````
 `AppClient`
 ````
-import AppUser from 'katejs-user/lib/AppClient';
+import AppUser from 'katejs/lib/client';
 
 const AppClient = parent => class Client extends use(parent, AppUser) {
   static title = title;
