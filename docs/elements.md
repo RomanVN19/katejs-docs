@@ -19,17 +19,28 @@ nav_order: 9
 - `hidden` - при установке атрибута в значение `true` элемент не отображается
 - `elements` - для групп и прочих элементов в этом поле записываются дочерние элементы.
 
-## LABEL - Текст
+## LABEL - Текст, ссылка
 ````
 {
   type: Elements.LABEL,
   title: 'Label content',
-  tag: 'p'(default) || 'quote' || 'h1' || 'h2' || ... || 'h6',
+  tag: 'p'(default) || 'quote' || 'h1' || 'h2' || ... || 'h6' || 'a',
   style: { textAlign: 'center' },
 }
 ````
 - `tag` - вариант рендера.
 - `style` - возможно установить CSS стиль текстовой метки (в формате Inline CSS).
+
+Для оформления ссылки можно указать дополнительные атрибуты идентичные атрибутам тэга 'a'
+````
+{
+  type: Elements.LABEL,
+  tag: 'a',
+  title: 'link title',
+  href: 'https://google.com',
+  target: '_blank',
+}
+````
 
 ## INPUT - Поле ввода
 ````
@@ -174,7 +185,6 @@ nav_order: 9
 {
   type: Elements.TABLE_EDITABLE,
   hideRowActions: false || true,
-  rowClick: row => ()
   columns: [
     {
       title: 'column title',
@@ -183,7 +193,7 @@ nav_order: 9
       type: Elements.INPUT,
       width: 100,
       onChange: row => (),
-      onClick: row => (),
+      onClick: (row, rowData) => (),
       getElement: value => {},
     }
   ],
@@ -198,7 +208,6 @@ nav_order: 9
 
 - `hideRowActions` - скрыть кнопки удаления и перемещения строк
 - `onDelete` - вызывается при интерактивном удалении строки таблицы
-- `rowClick` - событие вызываемое при нажатии на строку
 
 Тип элемента и его опции
 указывается дополнительно в массиве колонок.
