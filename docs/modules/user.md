@@ -12,7 +12,7 @@ nav_order: 1
 ## Подключение
 `AppServer`
 ````
-import AppUser from 'katejs';
+import AppUser from 'katejs-modules';
 
 ...
 
@@ -48,7 +48,7 @@ const AppServer = parent => class Server extends use(parent, AppUser) {
 ````
 `AppClient`
 ````
-import AppUser from 'katejs/lib/client';
+import AppUser from 'katejs-modules/lib/client';
 
 const AppClient = parent => class Client extends use(parent, AppUser) {
   static title = title;
@@ -119,6 +119,32 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
 и "специфические" - особенные для разных категорий и назначать каждому
 пользователю базову роль и специфическую. Такое разделение позволит обновлять
 роли в процессе разработки "в одном месте".
+
+## Контроль доступа на клиенте
+Возможно ограничить видимость пунктов меню, задав им дополнительное поле `role`
+````
+this.menu[0].role = {
+  entity: 'Task',
+  method: 'put'
+}
+````
+Пункт меню будет отображен пользователю если у него есть разрешение на `entity`.`method`
+
+Для контроля прав пользователя в формах используется метод приложения `allow`
+(оба синтаксиса возможны)
+````
+this.app.allow({ entity: 'Task', method: 'put' })
+this.app.allow('Task', 'put')
+```` 
+
+## Контроль доступа на сервере
+Для контроля прав пользователя в классах сущностей используется метод приложения `allow`
+````
+this.app.allow({ ctx }, entity, method)
+```` 
+В контексте (ctx) каждого запроса к методу сущности добавляется поле `user` в котором
+содержаться поля токена.
+
 
 ## Добавление дополнительных полей в User
 

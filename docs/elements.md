@@ -185,6 +185,7 @@ nav_order: 9
 {
   type: Elements.TABLE_EDITABLE,
   hideRowActions: false || true,
+  rowClick: (row) => (),
   columns: [
     {
       title: 'column title',
