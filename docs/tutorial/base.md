@@ -1,9 +1,11 @@
 ---
 layout: default
-title: Основа системы
+title: 1. Основа системы
 parent: Руководство
 nav_order: 1
 ---
+
+# 1. Основа системы
 
 Для начала необходимо развернуть шаблон и установить зависимости как указано в [руководстве](https://docs.katejs.ru/app.html)
 
@@ -66,3 +68,12 @@ npm run dev-client
 <p align="center">
   <img width="200" height="200" src="https://github.com/romannep/katejs/raw/master/docs/assets/img/base.png">
 </p>
+
+# Код
+
+Изменения, внесенные на данном этапе: [1. Base](https://github.com/romannep/katejs-tutorial/commit/b58f6116752f69ad756e6b26ee6acee1f18ad9d8)
+
+Код данного этапа можно посмотреть по тэгу `step-1`:
+````
+git checkout step-1
+````

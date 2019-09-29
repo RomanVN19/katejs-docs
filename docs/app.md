@@ -17,7 +17,7 @@ nav_order: 3
 
 Для разворачивания шаблона в текущую папку:
 ````
-git clone --depth=1 https://github.com/romannep/katejs-boilerplate.git .
+git clone https://github.com/romannep/katejs-boilerplate.git .
 npm install
 ````
 Поправьте в файле package.json как минимум поля `name`, `author`.
