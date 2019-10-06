@@ -5,14 +5,14 @@ parent: Модули
 nav_order: 1
 ---
 
-# KateJS - Пользователи и роли
+# AppUser - Пользователи и роли
 
 Модуль добавляет функционал пользователей, ролей доступа, token based авторизации.
 
 ## Подключение
 `AppServer`
 ````
-import AppUser from 'katejs-modules';
+import { AppUser } from 'katejs-modules';
 
 ...
 
@@ -48,13 +48,12 @@ const AppServer = parent => class Server extends use(parent, AppUser) {
 ````
 `AppClient`
 ````
-import AppUser from 'katejs-modules/lib/client';
+import { AppUser } from 'katejs-modules/lib/client';
 
 const AppClient = parent => class Client extends use(parent, AppUser) {
-  static title = title;
-  static logo = logo;
-  static primaryColor = '#5F77D8';
 
+  ...
+  
   constructor(params) {
     super(params);
 
