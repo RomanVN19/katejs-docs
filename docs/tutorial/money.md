@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Денежные средства
+title: 5. Денежные средства
 parent: Руководство
 nav_order: 5
 ---

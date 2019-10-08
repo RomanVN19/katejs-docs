@@ -40,7 +40,7 @@ has_children: true
 
 ## Код
 
-Образец кода храниться в реползитории [katejs-tutorial](https://github.com/romannep/katejs-tutorial).
+Образец кода храниться в репозитории [katejs-tutorial](https://github.com/romannep/katejs-tutorial).
 Рекомендуется собственный проект реализовывать в отдельной папке, а
 образец склонировать и просматривать по мере необходимости.
 

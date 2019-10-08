@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Пользователи и локализация
+title: 6. Пользователи и локализация
 parent: Руководство
 nav_order: 6
 ---
@@ -85,7 +85,7 @@ export default translate;
 
 # Код
 
-Изменения, внесенные на данном этапе: [6. Users & translate]()
+Изменения, внесенные на данном этапе: [6. Users & translate](https://github.com/romannep/katejs-tutorial/commit/91fdf62522f7bb611a8ed60ee68d7fd5d7352ba9)
 
 Код данного этапа можно посмотреть по тэгу `step-6`:
 ````
