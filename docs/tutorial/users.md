@@ -50,18 +50,42 @@ const AppClient = parent => class Client extends use(parent, AppDoc, AppUser) {
 полностю закрывает требования к работе с пользователями нашей системы.
 
 <p align="center">
-  <img width="200" height="200" src="https://github.com/romannep/katejs/raw/master/docs/assets/img/user_1.png">
+  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/user_1.png">
 </p>
 
 
 ## Локализация
 
+Для локализации нашего приложения используем штатный в фреймворке механизм.
 
+Для этого модифицируем файл переводов:
 
+`translations.js`
+````
+import { translations } from 'katejs/lib/client';
+
+/* eslint-disable quote-props */
+const translate = {
+  languages: ['ru'],
+  ru: {
+    ...translations.ru,
+    'Expenses': 'Расходы',
+  },
+};
+
+export default translate;
+````
+Фреймворк заменяет строки по ключу в объекте `translate`.
+
+Часть переводов уже содержится в `katejs/lib/client`, нам останется только ввести переводы
+созданных нами сущностей.
+<p align="center">
+  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/user_2.png">
+</p>
 
 # Код
 
-Изменения, внесенные на данном этапе: [6. Users]()
+Изменения, внесенные на данном этапе: [6. Users & translate]()
 
 Код данного этапа можно посмотреть по тэгу `step-6`:
 ````

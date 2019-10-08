@@ -66,7 +66,7 @@ npm run dev-client
 статей расходов, доходов и кошельки - места хранения денежных средств.
 
 <p align="center">
-  <img width="200" height="200" src="https://github.com/romannep/katejs/raw/master/docs/assets/img/base.png">
+  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/base.png">
 </p>
 
 # Код

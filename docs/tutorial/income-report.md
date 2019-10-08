@@ -141,7 +141,7 @@ export default class IncomeReport extends Form {
 
 Отчет готов!
 <p align="center">
-  <img width="200" height="200" src="https://github.com/romannep/katejs/raw/master/docs/assets/img/income_report.png">
+  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/income_report.png">
 </p>
 
 Разумеется, отчет должен формироваться по периоду. Его лего доделать, добавив на форму
