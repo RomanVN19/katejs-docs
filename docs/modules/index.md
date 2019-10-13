@@ -10,3 +10,5 @@ has_children: true
 ````
 npm install katejs-modules
 ````
+
+Исходный код всех модулей доступен в репозитории [katejs-modules](https://github.com/romannep/katejs-modules)

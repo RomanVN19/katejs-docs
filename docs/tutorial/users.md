@@ -62,7 +62,7 @@ const AppClient = parent => class Client extends use(parent, AppDoc, AppUser) {
 
 `translations.js`
 ````
-import { translations } from 'katejs/lib/client';
+import translations from 'katejs/lib/translations';
 
 /* eslint-disable quote-props */
 const translate = {
