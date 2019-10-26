@@ -361,6 +361,7 @@ this.content.tableId.addRow({ title: 'row3' });
         id: 'fileTabs',
         type: Elements.TABS,
         active: 0,
+        onChange: (tabIndex) => ()
         elements: [
           {
             title: 'Tab1',
@@ -378,7 +379,7 @@ this.content.tableId.addRow({ title: 'row3' });
       },
 
 ````
-Текущий активный таб может быть установлен программно
+Текущий активный таб может быть считан/установлен программно
 ````
 this.content.fileTabs.active = 0;
 ````
@@ -388,7 +389,7 @@ this.content.fileTabs.active = 0;
 {
   type: Elements.IMAGE,
   title: 'Image alt text',
-  src: '/path/to/image.jpf',
+  src: '/path/to/image.jpg',
 }
 ````
 
