@@ -111,7 +111,17 @@ export default class Payment extends Entity {
   }
 
 ````
+## Контроль записи движений
+У класса сущности регистра можно определить метод `beforeRecordsPut` 
+который будет вызываться перед записью данных в регистр
+````
+export default Entity => class MoneyRecord extends Entity {
+  async beforeRecordsPut({ records }) {
+    // do smthing with records
+  }
+};
 
+````
 ## Выборка движений
 Сущность регистра предоставляет два дополнительных метода обращения к данным, которые расширяют
 стандаттный метод `query`
