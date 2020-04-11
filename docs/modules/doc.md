@@ -112,11 +112,12 @@ export default class Payment extends Entity {
 
 ````
 ## Контроль записи движений
-У класса сущности регистра можно определить метод `beforeRecordsPut` 
-который будет вызываться перед записью данных в регистр
+У класса сущности регистра можно определить методы `beforeRecordsPut`,
+`afterRecordsPut` 
+которые будут вызываться перед и после записью данных в регистр
 ````
 export default Entity => class MoneyRecord extends Entity {
-  async beforeRecordsPut({ records }) {
+  async beforeRecordsPut({ records, transaction. ctx }) {
     // do smthing with records
   }
 };
