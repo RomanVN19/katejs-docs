@@ -100,9 +100,11 @@ nav_order: 9
   type: Elements.DATE,
   title: 'Label',
   value: '',
+  timeFormat: true,
   onChange: (value, allProps) => (),
 },
 ````
+- `timeFormat` - при значении `false` скрывает поле выбора времени
 
 ## SELECT - поле выбора, поле автокомплита
 ````
@@ -331,6 +333,7 @@ this.content.tableId.addRow({ title: 'row3' });
   fullWidth: false || true,
   open: false,
   handleClose: () => (),
+  noScroll: false,
   elements: [
     {
       type: Elements.LABEL,
@@ -354,7 +357,8 @@ this.content.tableId.addRow({ title: 'row3' });
 ````
   this.content.dialogId.open = true;
 ````
-
+- `noScroll`: при значении `false` отключает вертикальный скрол. 
+Используется для однострочных диалогов с выпадающими элементами (DATE, SELECT)
 ## TABS - панель с табами
 ````
       {
