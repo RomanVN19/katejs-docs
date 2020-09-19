@@ -1,7 +1,7 @@
 {
-  "name": "katejs",
+  "name": "katejs-docs",
   "version": "0.7.3",
-  "description": "KateJS - фреймворк разработки бизнес приложений.",
+  "description": "Документация к фреймворку разработки бизнес приложений KateJS.",
   "main": "lib/index.js",
   "scripts": {
     "build": "babel src --out-dir lib --copy-files",
