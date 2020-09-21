@@ -208,7 +208,7 @@ npm run dev-dbsync
 формируется заголовок.
 
 <p align="center">
-  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/money_1.png">
+  <img src="https://github.com/romannep/katejs-docs/raw/master/docs/assets/img/money_1.png">
 </p>
 
 Теперь сделаем формирование движений. Движения - всегда массив, но в нашем случае
@@ -304,7 +304,7 @@ export default class IncomeReport extends Form {
 открыть каждый докмент и пересохранить его ("Нажать ОК").
 
 <p align="center">
-  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/money_1.png">
+  <img src="https://github.com/romannep/katejs-docs/raw/master/docs/assets/img/money_1.png">
 </p>
 
 # Код

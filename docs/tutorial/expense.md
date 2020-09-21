@@ -163,7 +163,7 @@ export default ItemForm => class ExpenseItem extends ItemForm {
 
 Наша документ приобретает следующий вид:
 <p align="center">
-  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/expense.png">
+  <img src="https://github.com/romannep/katejs-docs/raw/master/docs/assets/img/expense.png">
 </p>
 
 Отчет по расходам практически идентичен отчету по доходам, за исключением

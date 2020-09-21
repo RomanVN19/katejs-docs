@@ -50,7 +50,7 @@ const AppClient = parent => class Client extends use(parent, AppDoc, AppUser) {
 полностю закрывает требования к работе с пользователями нашей системы.
 
 <p align="center">
-  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/user_1.png">
+  <img src="https://github.com/romannep/katejs-docs/raw/master/docs/assets/img/user_1.png">
 </p>
 
 
@@ -80,7 +80,7 @@ export default translate;
 Часть переводов уже содержится в `katejs/lib/client`, нам останется только ввести переводы
 созданных нами сущностей.
 <p align="center">
-  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/user_2.png">
+  <img src="https://github.com/romannep/katejs-docs/raw/master/docs/assets/img/user_2.png">
 </p>
 
 # Код

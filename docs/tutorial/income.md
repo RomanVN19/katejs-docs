@@ -65,7 +65,7 @@ npm run dev-client
 
 У нас уже получился готовый документ для отражения доходов
 <p align="center">
-  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/income_1.png">
+  <img src="https://github.com/romannep/katejs-docs/raw/master/docs/assets/img/income_1.png">
 </p>
 
 Давайте немного улучшим документ - расположим поля выбора кошелька и статьи в одной строке.
@@ -120,7 +120,7 @@ const AppClient = parent => class Client extends use(parent) {
 
 Наша форма приобретает следующий вид:
 <p align="center">
-  <img src="https://github.com/romannep/katejs/raw/master/docs/assets/img/income_2.png">
+  <img src="https://github.com/romannep/katejs-docs/raw/master/docs/assets/img/income_2.png">
 </p>
 
 Модификация форм с помощью класс-миксинов позволяет не создавать форму целиком,
