@@ -111,29 +111,33 @@ this.elements.set('button', {
 - `beforeUnmount` - вызывается непосредственно перед закрытием формы.
 
 ### Важно
-Обработчики событий важно определять как свойства класса, чтобы
-сохранить контекст `this`. 
+Доля обработчиков событий важно сохранить контекст `this` 
+и обеспеспечить возможность их переопределения в классах потомках,
+поэтому оптимальным способом будет делать их методами класса
+а контекст замыкать в месте создания элемента(конструкторе) 
+через стрелочную функцию 
 ````
-click = () => {
+constructor(args) {
+  ...
+  this.elements.push({
+    type: Elements.BUTTON,
+    title: 'Load',
+    onClick: () => this.load(),
+  });
+  this.elements.push({
+    type: Elements.INPUT,
+    title: 'Username',
+    onChange: (value) => this.usernameChange(value),
+  });
+}
+load() {
   this.content.title.value = 'test value';
+}
+usernameChange(value) {
+  console.log('username', value);
 }
 ````
 
-Функциональные методы могут быть переопределены (дополнены), 
-поэтому имеет смысл их оформлять как методы класса, 
-а для вызова создать дополнительный обработчик:
-````
-const click = Symbol('click');
-
-...
-
-  load() {
-    // ...
-  }
-  [click] = () => {
-    this.load();
-  }
-````
 ### `app`
 В классе формы можно обратиться к экземпляру приложения через поле `app`
 ````
@@ -204,9 +208,11 @@ export default class BuildingItem extends ItemForm {
 }
 ````
 
-Или оформлена в виде композиции класса и миксина для использования в приложении,
+Или оформлена в виде класс-миксина для использования в приложении,
 когда родительский класс будет определен в процессе работы программа.
 
+Этот способ является предпочтительным для модификации автоматически
+сгенерированных форм.
 
 `forms/UserListMixin.js`
 ````
@@ -237,7 +243,10 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
   constructor(params) {
     super(params);
     ...
-    this.forms.UserList = UsersListMixin(this.forms.UserList);
+    this.forms = {
+      ...this.forms,
+      UserList: UsersListMixin(this.forms.UserList),
+    };
     ...
   }
 }
@@ -261,7 +270,7 @@ const AppClient = parent => class Client extends use(parent, AppUser) {
 вторым параметром передается сама форма, для создания метода выборки элементов
 в том случае когда поле структуры является ссылкой.
 ````
-import { Form } from 'katejs/lib/client;
+import { Form, getElement } from 'katejs/lib/client;
 import Fields from 'katejs/lib/fields';
 
 class TestForm extends Form {
@@ -287,6 +296,9 @@ class TestForm extends Form {
 Фреймворк предоставляет возможность быстрого создания формы списка элементов
 с целью последующей модификации с помощью наследования от  функции класса `ListForm`.
 
+Эта же функция используется при автоматической генерации форм.
+Поэтому в общем случае следует использовать изменение типовой формы
+через [класс-миксин](https://docs.katejs.ru/form.html#%D0%BD%D0%B0%D1%81%D0%BB%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D1%84%D0%BE%D1%80%D0%BC).
 ````
 import { ListForm } from 'katejs/lib/client';
 import Fields from 'katejs/lib/fields';
@@ -334,6 +346,10 @@ export default class BuildingList extends ListForm({ Building }, { addActions: t
 ## ItemForm
 Фреймворк предоставляет возможность быстрого создания формы редактирования
 с целью последующей модификации с помощью наследования от  функции класса `ItemForm`.
+
+Эта же функция используется при автоматической генерации форм.
+Поэтому в общем случае следует использовать изменение типовой формы
+через [класс-миксин](https://docs.katejs.ru/form.html#%D0%BD%D0%B0%D1%81%D0%BB%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D1%84%D0%BE%D1%80%D0%BC).
 
 ````
 import { ItemForm, Elements, getElement } from 'katejs/lib/client';
