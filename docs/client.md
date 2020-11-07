@@ -20,6 +20,7 @@ import AppUser from 'katejs-user/lib/AppClient'; // пример наследо�
 
 const AppClient = parent => class Client extends use(parent, AppUser) {
   static title = title; // название приложения
+  static useLogger = false; // вывод redux логов
   constructor(params) {
     super(params);
     this.init({ structures, addToMenu: true }); 
