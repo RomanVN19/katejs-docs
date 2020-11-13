@@ -223,7 +223,14 @@ export default ItemForm => class UserItem extends ItemForm {
     };
 ...
 ````
-
+## Предопреленные методы
+`AppClient.afterUserInit` вызывается при успешной аутентификации или
+при afterInit если пользователь авторизован.
+````
+  async afterUserInit() {
+    
+  }
+````
 ## Описание API для внешних приложений
 
 Все запросы выполняются методом `POST` с параметрами в `JSON` формате

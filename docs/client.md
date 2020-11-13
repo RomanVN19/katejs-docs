@@ -83,9 +83,10 @@ export default AppClient;
 ## `afterInit`
 `afterInit()` - метод вызывается после инициализации приложения, при его наличии.
 Следует предусмотреть возможность существования родительского метода, выполнив его вызов.
+Платформа ждет выполнения метода перед открытием форм.
 ````
-afterInit() {
-  if (super.afterInit) super.afterInit();
+async afterInit() {
+  if (super.afterInit) await super.afterInit();
   // ...
 }
 ````
