@@ -142,3 +142,42 @@ export const structures = { // Объект с сущностями
   attributes: ['title', 'uuid', 'startDate'],
 },
 ````
+
+## Индексирование
+Для индексирования полей сущности или ее таблицы служит свойство `indexes`
+````
+const Deal = {
+  fields: [
+    {
+      name: 'title',
+      type: Fields.STRING,
+    },
+    {
+      name: 'step',
+      type: Fields.STRING,
+    },
+  ],
+  indexes: [
+    { fields: ['step'] },
+  ],
+  tables: [
+    {
+      name: 'comments',
+      indexes: [
+        { fields: ['date'] },
+      ],
+      fields: [
+        {
+          name: 'date',
+          type: Fields.DATE,
+        },
+        {
+          name: 'comment',
+          type: Fields.STRING,
+        },
+      ],
+    },
+  ],
+};
+````
+Правила составления сложных индексов идентичны документации [Sequelize](https://sequelize.org/master/manual/indexes.html).
