@@ -1,8 +1,8 @@
 ---
 layout: default
-title: Настройки
+title: Файлы
 parent: Модули
-nav_order: 3
+nav_order: 4
 ---
 
 # AppFiles - работа с файлами.
