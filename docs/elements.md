@@ -57,7 +57,8 @@ nav_order: 9
   inputType: 'password' || 'file' || '',
   accept: '.pdf' || '',
   setRef: false || true,
-  autoComplete: 'off'
+  autoComplete: 'off',
+  onKeyPress: (keyboardEvent) => (),
 }
 ````
 - `success` - Подчеркивает зеленым и отображает "галочку" в конце
@@ -70,6 +71,7 @@ nav_order: 9
 максимальным (отображаемый размер) `rowsMax`
 - `setRef` - при указании значения true будет сохранена ссылка на DOM элемент при создании компонента, доступная как `this.content.inputId.ref`
 - `autoComplete` - при указании значения 'off' будет отключена браузерная функция автокомплита`
+- `onKeyPress` - возможность указать обработчик нажатия клавиши (например, `enter`)
 
 ## SWITCH - переключатель
 ````
